@@ -93,7 +93,7 @@ namespace line_out_namespace{
 	    {
 					 /* Here we cast userData to Sine* type so we can call the instance method paCallbackMethod, we can do that since
 					    we called Pa_OpenStream with 'this' for userData */
-					 return ((lineOut*)userData)->paCallbackMethod(inputBuffer, outputBuffer,
+					 return ((CLineOut*)userData)->paCallbackMethod(inputBuffer, outputBuffer,
 																					     framesPerBuffer,
 																					     timeInfo,
 																					     statusFlags);
@@ -109,7 +109,7 @@ namespace line_out_namespace{
 	     */
 	    static void paStreamFinished(void* userData)
 	    {
-		 		return ((lineOut*)userData)->paStreamFinishedMethod();
+		 		return ((CLineOut*)userData)->paStreamFinishedMethod();
 	    }
 
 	};//CLineOut ends

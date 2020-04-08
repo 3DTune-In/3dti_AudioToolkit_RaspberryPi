@@ -31,14 +31,14 @@
 
 #define NUM_SECONDS   	(1) 		//For each tone.
 #define SAMPLE_RATE   	(44100)	//22050) //(44100)
-#define FRAMES_PER_BUFFER  	(62)
+#define FRAMES_PER_BUFFER  	(256)
 #define FRECUENCY    	(440)
 
 #ifndef M_PI
 #define M_PI  		(3.14159265)
 #endif
 
-using namespace line_out;
+using namespace line_out_namespace;
 
 /*******************************************************************/
 
@@ -48,34 +48,12 @@ int main(void);
 
 int main(void)
 {
-    vector <float> audioLeftData;
-    vector <float> audioRightData;
-    for( int i=0; i<SAMPLE_RATE; i++ )
-    {
-        (audioLeftData).push_back( (float) sin( ((double)i/(double)SAMPLE_RATE) *FRECUENCY* M_PI * 2. ));
-        (audioRightData).push_back(audioLeftData[i]);
-    }
-    lineOut sonido(&audioLeftData, &audioRightData,SAMPLE_RATE ); //Modo seno.
-    printf("PortAudio Test: output sine wave. SR = %d, BufSize = %d\n", SAMPLE_RATE, FRAMES_PER_BUFFER);
-    ScopedPaHandler paInit;
-    if( paInit.result() != paNoError ) goto error;
-    if (sonido.open(Pa_GetDefaultOutputDevice(),FRAMES_PER_BUFFER))
-    {
-        if (sonido.start())
-        {
-            printf("Play for %d seconds.\n", NUM_SECONDS );
-            Pa_Sleep( NUM_SECONDS * 1000 );
-	     if(sonido.setFrecuencyRight(2*FRECUENCY)) Pa_Sleep( NUM_SECONDS * 1000 );
-     	     if(sonido.setFrecuencyLeft(FRECUENCY/2)) Pa_Sleep( NUM_SECONDS * 1000 );;
-            sonido.stop();
-        }
-        sonido.close();
-    }
+    printf("creator");
+    CLineOut TestLine;
+    printf("setup");
+    TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, SAMPLE_RATE);
+    printf("autotest");
+    TestLine.autoTest();
     printf("Test finished.\n");
-    return paNoError;
-error:
-    fprintf( stderr, "An error occured while using the portaudio stream\n" );
-    fprintf( stderr, "Error number: %d\n", paInit.result() );
-    fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( paInit.result() ) );
-    return 1;
+    return 0;
 }

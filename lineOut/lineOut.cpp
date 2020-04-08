@@ -32,17 +32,21 @@ using namespace std;
 
 #define DEFAULT_SAMPLING_RATE 44100
 #define DEFAULT_TONE_FRECUENCY 440
+#define NUM_SECONDS 1
 
 namespace line_out_namespace{
 	//Start the lineOut stream with default configuration
 	//A sin wave of 440Hz, with a 44100 size of SampleRate.
 	CLineOut::CLineOut() : stream(0){}
 
-	bool CLineOut::setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate):iSampleRate(__iSampleRate), iBufferSize(__iBufferSize), {
+	bool CLineOut::setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate){
+		iSampleRate =(__iSampleRate);
+		iBufferSize =(__iBufferSize);
+		
 		PaStreamParameters outputParameters;
-		outputParameters.device = index;
+		outputParameters.device = __index;
 		if (outputParameters.device == paNoDevice) return false;//device not found
-		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(index);
+		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
 		if (pInfo != 0) printf("Output device name: '%s'\r", pInfo->name);
 
 		outputParameters.channelCount = 2;       /* stereo output */
@@ -57,13 +61,13 @@ namespace line_out_namespace{
 															 __iSampleRate,
 															 __iBufferSize,
 															 paClipOff,      /* we won't output out of range samples so don't bother clipping them */
-															 &lineOut::paCallback,
+															 &CLineOut::paCallback,
 															 this            /* Using 'this' for userData so we can cast to lineOut* in paCallback method */
 															 );
 
 		if (err != paNoError) return false;	 /* Failed to open stream to device !!! */
 
-		err = Pa_SetStreamFinishedCallback( stream, &lineOut::paStreamFinished );
+		err = Pa_SetStreamFinishedCallback( stream, &CLineOut::paStreamFinished );
 		if (err != paNoError)
 		{
 			  Pa_CloseStream( stream );
@@ -102,12 +106,17 @@ namespace line_out_namespace{
 	bool CLineOut::autoTest(){
     for( int i=0; i<iSampleRate; i++ )
     {
-        (audioLeftData).push_back( (float) sin( ((double)i/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* M_PI * 2. ));
-        (audioRightData).push_back(audioLeftData[i]);
+        (lineOutLeftData)->push_back( (float) sin( ((double)i/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* M_PI * 2. ));
+        (lineOutRightData)->push_back((float) sin( ((double)i/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* M_PI * 2. ));
     }
-		CLineAudio::start();
+    printf("data created\n");
+		CLineOut::start();
+		printf("started\n");
 		Pa_Sleep( NUM_SECONDS * 1000 );
-		CLineAudio::stop();
-		CLineAudio::close();
+		CLineOut::stop();
+		printf("stopped\n");
+		CLineOut::close();
+		printf("closed\n");
+		return true;
 	}
 }//CLineOut ends
