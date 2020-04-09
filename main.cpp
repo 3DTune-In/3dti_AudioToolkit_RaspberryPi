@@ -23,8 +23,8 @@
 
 #include <stdio.h>
 #include <math.h>
-#include "./lineOut/portaudio.h"
-#include "./lineOut/lineOut.hpp"
+#include "./src/portaudio.h"
+#include "./src/lineOut.hpp"
 #include<vector> // for array, at()
 #include <iostream>
 #define NUM_SECONDS   	(1) 		//For each tone.
