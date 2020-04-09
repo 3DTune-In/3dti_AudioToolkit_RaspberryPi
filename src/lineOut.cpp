@@ -1,4 +1,5 @@
 /**
+* \start date	december 2019
 * \class line_out
 *
 * \brief Declaration of class line_out
@@ -27,25 +28,34 @@
 #include "lineOut.hpp"
 #include <math.h>
 #include "portaudio.h"
-
+#include <iostream>
 using namespace std;
 
-#define DEFAULT_SAMPLING_RATE 44100
-#define DEFAULT_TONE_FRECUENCY 440
+#define DEFAULT_TONE_FRECUENCY 880
 #define NUM_SECONDS 1
 
 namespace line_out_namespace{
 	//Start the lineOut stream with default configuration
 	//A sin wave of 440Hz, with a 44100 size of SampleRate.
-	CLineOut::CLineOut() : stream(0){}
+	CLineOut::CLineOut() : stream(0){
+	    lineOutLeftData = &leftData;
+	    lineOutRightData = &rightData;
+	}
 
 	bool CLineOut::setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate){
-		iSampleRate =(__iSampleRate);
-		iBufferSize =(__iBufferSize);
-		
+		CLineOut::iSampleRate =(__iSampleRate);
+		CLineOut::iBufferSize =(__iBufferSize);
+    for(int count=0; count < __iSampleRate; count++){
+    	leftData.push_back(0);
+    	rightData.push_back(0);
+    }
+
 		PaStreamParameters outputParameters;
 		outputParameters.device = __index;
-		if (outputParameters.device == paNoDevice) return false;//device not found
+		if (outputParameters.device == paNoDevice){
+		 cout << "aquí";
+		 return false;//device not found
+		}
 		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
 		if (pInfo != 0) printf("Output device name: '%s'\r", pInfo->name);
 
@@ -67,11 +77,11 @@ namespace line_out_namespace{
 
 		if (err != paNoError) return false;	 /* Failed to open stream to device !!! */
 
-		err = Pa_SetStreamFinishedCallback( stream, &CLineOut::paStreamFinished );
+		err = Pa_SetStreamFinishedCallback( CLineOut::stream, &CLineOut::paStreamFinished );
 		if (err != paNoError)
 		{
-			  Pa_CloseStream( stream );
-			  stream = 0;
+			  Pa_CloseStream( CLineOut::stream );
+			  CLineOut::stream = 0;
 	  		return false;
 		}
 		return true;
@@ -80,38 +90,45 @@ namespace line_out_namespace{
 	//Close the lineOut device of this lineOut variable.
 	bool CLineOut::close()
 	{
-	    if (stream == 0) return false;
+	    if (CLineOut::stream == 0) return false;
 
-	    PaError err = Pa_CloseStream( stream );
-	    stream = 0;
+	    PaError err = Pa_CloseStream( CLineOut::stream );
+	    CLineOut::stream = 0;
 	    return (err == paNoError);
 	}
 
 	//Start the lineOut streaming.
 	bool CLineOut::start()
 	{
-	    if (stream == 0) return false;
-	    PaError err = Pa_StartStream( stream );
+	    if (CLineOut::stream == 0) return false;
+	    PaError err = Pa_StartStream( CLineOut::stream );
 	    return (err == paNoError);
 	}
 
 	//Stop the lineOut streaming.
 	bool CLineOut::stop()
 	{
-	    if (stream == 0) return false;
-	    PaError err = Pa_StopStream( stream );
+	    if (CLineOut::stream == 0) return false;
+	    PaError err = Pa_StopStream( CLineOut::stream );
 	    return (err == paNoError);
 	}
 
 	bool CLineOut::autoTest(){
-    for( int i=0; i<iSampleRate; i++ )
+	  /*(CLineOut::lineOutLeftData)->reserve(CLineOut::iBufferSize*sizeof(float));
+	  (CLineOut::lineOutRightData)->reserve(CLineOut::iBufferSize*sizeof(float));*/
+		printf("started\n");
+		float fSine = 0;
+    for( unsigned int count=0; count<iSampleRate; count++ )
     {
-        (lineOutLeftData)->push_back( (float) sin( ((double)i/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* M_PI * 2. ));
-        (lineOutRightData)->push_back((float) sin( ((double)i/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* M_PI * 2. ));
+    		fSine = (float) sin( ((double)count/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* NUMBER_PI * 2. );
+        rightData[count]=(fSine);
+        //cout << rightData[i] << endl;
+        leftData[count] =(fSine);
     }
     printf("data created\n");
 		CLineOut::start();
-		printf("started\n");
+
+    printf("playing\n");
 		Pa_Sleep( NUM_SECONDS * 1000 );
 		CLineOut::stop();
 		printf("stopped\n");
