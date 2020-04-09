@@ -1,0 +1,3 @@
+YOUR_BINARY*
+./src/libportaudio.a
+./src/libportaudio.h

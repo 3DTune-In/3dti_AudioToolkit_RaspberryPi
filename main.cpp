@@ -1,8 +1,9 @@
 /**
+* \start date	december 2019
 * \class line_out
 *
-* \brief main program that play a couple of tones.
-* \date	december 2019
+* \brief Declaration of class line_out
+* \date	April 2020
 *
 * \authors: Gonzalo Alfonso Bueno Santana
 * \b Contact : gonzupi6@gmail.com
@@ -14,12 +15,9 @@
 * \b Project: 3DTI (3D-games for TUNing and lEarnINg about hearing aids) ||
 * \b Website: http://3d-tune-in.eu/
 *
-* \b Copyright: University of Malaga - 2019
-*
-* \b Licence: This copy of 3dti_AudioToolkit is licensed to you under the terms described in the 3DTI_AUDIOTOOLKIT_LICENSE file included in this distribution.
-*
-* \b Acknowledgement: This project has received funding from the European Union's Horizon 2020 research and innovation programme under grant agreement No 644051
+* \b Copyright: University of Malaga - 2020
 */
+
 
 /*! \file */
 

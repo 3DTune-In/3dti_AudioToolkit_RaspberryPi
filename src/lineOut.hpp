@@ -1,4 +1,5 @@
 /**
+* \start date	december 2019
 * \class line_out
 *
 * \brief Declaration of class line_out
@@ -16,6 +17,7 @@
 *
 * \b Copyright: University of Malaga - 2020
 */
+
 
 /*! \file */
 

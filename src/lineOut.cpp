@@ -1,4 +1,5 @@
 /**
+* \start date	december 2019
 * \class line_out
 *
 * \brief Declaration of class line_out
@@ -48,7 +49,7 @@ namespace line_out_namespace{
     	leftData.push_back(0);
     	rightData.push_back(0);
     }
-		
+
 		PaStreamParameters outputParameters;
 		outputParameters.device = __index;
 		if (outputParameters.device == paNoDevice){
@@ -122,12 +123,12 @@ namespace line_out_namespace{
     		fSine = (float) sin( ((double)count/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* NUMBER_PI * 2. );
         rightData[count]=(fSine);
         //cout << rightData[i] << endl;
-        leftData[count] =(fSine);       
+        leftData[count] =(fSine);
     }
     printf("data created\n");
 		CLineOut::start();
-		
-    printf("playing\n");   
+
+    printf("playing\n");
 		Pa_Sleep( NUM_SECONDS * 1000 );
 		CLineOut::stop();
 		printf("stopped\n");
