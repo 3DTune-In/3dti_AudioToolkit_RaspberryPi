@@ -25,7 +25,7 @@
 #include<vector> // for array, at()
 #include<tuple> // for get()
 #include "portaudio.h"
-
+#include <iostream>
 using namespace std;
 
 namespace line_out_namespace{
@@ -49,34 +49,36 @@ namespace line_out_namespace{
 			//play a #A4 440Hz for one second
 			bool autoTest();
 	private:
-	    int iSampleRate, iBufferSize;
+	    int iSampleRate;
+	    int iBufferSize;
 	    int iLeftSenFrecuency;
 	    int iRightSenFrecuency;
 	    PaStream *stream;
 	    vector <float> *lineOutLeftData;
 	    vector <float> *lineOutRightData;
+	    vector <float> leftData;
+	    vector <float> rightData;
+	    int uiActualFrame = 0;
 	    char caMessage[20];
 			int ileftPhase= 0;
 			int iRightPhase=0;
-
-	    int paCallbackMethod(const void *inputBuffer, void *outputBuffer,
-					 unsigned long framesPerBuffer,
-					 const PaStreamCallbackTimeInfo* timeInfo,
-					 PaStreamCallbackFlags statusFlags)
+      int iFillCircleBuffer = 0;
+      int iReadingCircleBuffer = 0;
+	    int paCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
+					 unsigned long __framesPerBuffer,
+					 const PaStreamCallbackTimeInfo* __timeInfo,
+					 PaStreamCallbackFlags __statusFlags)
 				    {
-							 float *out = (float*)outputBuffer;
-							 unsigned long i;
-							 (void) timeInfo; /* Prevent unused variable warnings. */
-							 (void) statusFlags;
-							 (void) inputBuffer;
-							 for( i=0; i<framesPerBuffer; i++ )
-							 {
-							     *out++ = lineOutLeftData->at(ileftPhase);  /* left */
-							     *out++ = lineOutRightData->at(iRightPhase);  /* right */
-							     ileftPhase += 1;
-							     if( ileftPhase >= iSampleRate ) ileftPhase -= iSampleRate;
-							     iRightPhase += 1;
-							     if( iRightPhase >= iSampleRate ) iRightPhase -= iSampleRate;
+							 float * fpOut = (float*)__outputBuffer;
+							 (void) __timeInfo; /* Prevent unused variable warnings. */
+							 (void) __statusFlags;
+							 (void) __inputBuffer;
+								for(int countActual=0; countActual<__framesPerBuffer;countActual++){
+										cout << "Frame actual " << uiActualFrame << " de valor " << (*lineOutLeftData)[uiActualFrame] << endl;
+										if(uiActualFrame >= iSampleRate) uiActualFrame-=iSampleRate;
+							     	*fpOut++=(*lineOutLeftData)[(uiActualFrame)];  /* left */
+							   		*fpOut++=(*lineOutRightData)[(uiActualFrame)];  /* right */
+										uiActualFrame++;
 							 }
 							 return paContinue;
 	    }//callback ends
@@ -113,5 +115,25 @@ namespace line_out_namespace{
 	    }
 
 	};//CLineOut ends
+	class ScopedPaHandler
+  {
+    public:
+        ScopedPaHandler()
+       : _result(Pa_Initialize())
+        {
+        }
+        ~ScopedPaHandler()
+        {
+       if (_result == paNoError)
+       {
+           Pa_Terminate();
+       }
+        }
+
+        PaError result() const { return _result; }
+
+    private:
+        PaError _result;
+  };
 }//namespace ends
 #endif

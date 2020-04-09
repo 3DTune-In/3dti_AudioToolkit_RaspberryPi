@@ -28,15 +28,11 @@
 #include "./lineOut/portaudio.h"
 #include "./lineOut/lineOut.hpp"
 #include<vector> // for array, at()
-
+#include <iostream>
 #define NUM_SECONDS   	(1) 		//For each tone.
 #define SAMPLE_RATE   	(44100)	//22050) //(44100)
-#define FRAMES_PER_BUFFER  	(256)
-#define FRECUENCY    	(440)
+#define FRAMES_PER_BUFFER  	(1024)
 
-#ifndef M_PI
-#define M_PI  		(3.14159265)
-#endif
 
 using namespace line_out_namespace;
 
@@ -48,12 +44,15 @@ int main(void);
 
 int main(void)
 {
-    printf("creator");
+    ScopedPaHandler paInit;
+    if(paInit.result() != paNoError) cout << "ERROR INICIANDO PORTAUDIO";
+    printf("creator\n");
     CLineOut TestLine;
-    printf("setup");
-    TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, SAMPLE_RATE);
-    printf("autotest");
-    TestLine.autoTest();
+    printf("setup\n");
+    cout << "Dispositivo principal numero " << Pa_GetDefaultOutputDevice() << endl;
+    if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, SAMPLE_RATE)) cout << "Error 2" << endl;
+    printf("autotest\n");
+    if(!TestLine.autoTest()) cout << "Error 3" << endl;
     printf("Test finished.\n");
     return 0;
 }
