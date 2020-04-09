@@ -42,7 +42,6 @@ namespace line_out_namespace{
       bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate);
 			//Close the lineOut device of this lineOut variable.
 	   	bool close();
-
 			//Start the lineOut streaming.
 	  	bool start();
 			//Stop the lineOut streaming.
@@ -75,8 +74,8 @@ namespace line_out_namespace{
 							 (void) __timeInfo; /* Prevent unused variable warnings. */
 							 (void) __statusFlags;
 							 (void) __inputBuffer;
-								for(int countActual=0; countActual<__framesPerBuffer;countActual++){
-										cout << "Frame actual " << uiActualFrame << " de valor " << (*lineOutLeftData)[uiActualFrame] << endl;
+								for(unsigned int countActual=0; countActual<__framesPerBuffer;countActual++){
+										//cout << "Frame actual " << uiActualFrame << " de valor " << (*lineOutLeftData)[uiActualFrame] << endl;
 										if(uiActualFrame >= iSampleRate) uiActualFrame-=iSampleRate;
 							     	*fpOut++=(*lineOutLeftData)[(uiActualFrame)];  /* left */
 							   		*fpOut++=(*lineOutRightData)[(uiActualFrame)];  /* right */
@@ -85,7 +84,7 @@ namespace line_out_namespace{
 							 return paContinue;
 	    }//callback ends
 
-	    /* This routine will be called by the PortlineOut engine when lineOut is needed.
+	    /* This routine will be called by the PortlineOut engine when CLineOut is needed.
 	    ** It may called at interrupt level on some machines so don't do anything
 	    ** that could mess up the system like calling malloc() or free().
 	    */
@@ -95,7 +94,7 @@ namespace line_out_namespace{
 														 PaStreamCallbackFlags statusFlags,
 														 void *userData )
 	    {
-					 /* Here we cast userData to Sine* type so we can call the instance method paCallbackMethod, we can do that since
+					 /* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
 					    we called Pa_OpenStream with 'this' for userData */
 					 return ((CLineOut*)userData)->paCallbackMethod(inputBuffer, outputBuffer,
 																					     framesPerBuffer,
@@ -104,13 +103,10 @@ namespace line_out_namespace{
 	    }
 
 
-	    void paStreamFinishedMethod()
-	    {
+	    void paStreamFinishedMethod(){
 		 		printf( "Stream Completed: %s\n", caMessage );
 	    }
-	    /*
-	     * This routine is called by portlineOut when playback is done.
-	     */
+	    // This routine is called by portlineOut when playback is done.
 	    static void paStreamFinished(void* userData)
 	    {
 		 		return ((CLineOut*)userData)->paStreamFinishedMethod();

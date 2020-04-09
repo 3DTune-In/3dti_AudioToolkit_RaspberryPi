@@ -116,9 +116,10 @@ namespace line_out_namespace{
 	bool CLineOut::autoTest(){
 	  /*(CLineOut::lineOutLeftData)->reserve(CLineOut::iBufferSize*sizeof(float));
 	  (CLineOut::lineOutRightData)->reserve(CLineOut::iBufferSize*sizeof(float));*/
-		printf("started\n");
+		
+		printf("Starting test...\n");
 		float fSine = 0;
-    for( unsigned int count=0; count<iSampleRate; count++ )
+    for( int count=0; count<iSampleRate; count++ )
     {
     		fSine = (float) sin( ((double)count/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* NUMBER_PI * 2. );
         rightData[count]=(fSine);
@@ -126,14 +127,29 @@ namespace line_out_namespace{
         leftData[count] =(fSine);
     }
     printf("data created\n");
+    
+    printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
 		CLineOut::start();
-
-    printf("playing\n");
 		Pa_Sleep( NUM_SECONDS * 1000 );
+		CLineOut::stop();
+		printf("stop for %d seconds\n",NUM_SECONDS);	
+    Pa_Sleep( NUM_SECONDS * 1000 );
+		
+		for( int count=0; count<iSampleRate; count++ )
+    {
+    		fSine = (float) sin( ((double)count/(double)iSampleRate) *(DEFAULT_TONE_FRECUENCY/2)*NUMBER_PI * 2. );
+        rightData[count]=(fSine);
+        //cout << rightData[i] << endl;
+        leftData[count] =(fSine);
+    }
+    printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
+    CLineOut::start();
+    Pa_Sleep( NUM_SECONDS * 1000 );
 		CLineOut::stop();
 		printf("stopped\n");
 		CLineOut::close();
 		printf("closed\n");
+		printf("Test finished! Good job!");
 		return true;
 	}
 }//CLineOut ends
