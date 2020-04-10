@@ -39,7 +39,7 @@ namespace line_out_namespace{
 			CLineOut();
 			//Open an lineOut device and configure it to be used with a "bufferSize"
 			//User needs to execute this before "start" function
-      bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate);
+      bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
 			//Close the lineOut device of this lineOut variable.
 	   	bool close();
 
@@ -50,40 +50,47 @@ namespace line_out_namespace{
 
 			//play a #A4 440Hz for one second
 			bool autoTest();
+
+			int getSampleRate();
+
+			int getBufferSize();
+
+			void getBufferDataAdress(vector <float> * __data);
+
+			void setBufferDataAdress(&(vector <float> * __data));
 	private:
+		//Global variables for the class.
 	    int iSampleRate;
 	    int iBufferSize;
-	    int iLeftSenFrecuency;
-	    int iRightSenFrecuency;
-	    PaStream *stream;
-	    vector <float> *lineOutLeftData;
-	    vector <float> *lineOutRightData;
-	    vector <float> leftData;
-	    vector <float> rightData;
-	    int uiActualFrame = 0;
+		  int iNumberOfChannels;
+			int iActualFrame = 0;
 	    char caMessage[20];
-			int ileftPhase= 0;
-			int iRightPhase=0;
-      int iFillCircleBuffer = 0;
-      int iReadingCircleBuffer = 0;
+	    PaStream *stream;
+
+	    vector <float> *vpfDataPointer;
+	    vector <float> *vpfLineOutRightData;
+	    vector <float> vfData;
+	    vector <float> vfRightData;
+
+			//This callback is called when the system need to, the stram is opened and started.
 	    int paCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 					 unsigned long __framesPerBuffer,
 					 const PaStreamCallbackTimeInfo* __timeInfo,
-					 PaStreamCallbackFlags __statusFlags)
-				    {
+					 PaStreamCallbackFlags __statusFlags){
 							 float * fpOut = (float*)__outputBuffer;
 							 (void) __timeInfo; /* Prevent unused variable warnings. */
 							 (void) __statusFlags;
 							 (void) __inputBuffer;
-								for(int countActual=0; countActual<__framesPerBuffer;countActual++){
-										cout << "Frame actual " << uiActualFrame << " de valor " << (*lineOutLeftData)[uiActualFrame] << endl;
-										if(uiActualFrame >= iSampleRate) uiActualFrame-=iSampleRate;
-							     	*fpOut++=(*lineOutLeftData)[(uiActualFrame)];  /* left */
-							   		*fpOut++=(*lineOutRightData)[(uiActualFrame)];  /* right */
-										uiActualFrame++;
+								for(int countActual=0; countActual<__framesPerBuffer*iNumberOfChannels;countActual+iNumberOfChannels){
+										cout << "Frame actual " << iActualFrame << " de valor " << (*vpfDataPointer)[iActualFrame] << endl;
+										if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=iSampleRate*iNumberOfChannels;
+										for(int iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
+											*fpOut++=(*vpfDataPointer)[(iActualFrame)];  /* left */
+											iActualFrame++;
+										}
 							 }
 							 return paContinue;
-	    }//callback ends
+	    }//paCallbackMethod ends
 
 	    /* This routine will be called by the PortlineOut engine when lineOut is needed.
 	    ** It may called at interrupt level on some machines so don't do anything
@@ -101,16 +108,17 @@ namespace line_out_namespace{
 																					     framesPerBuffer,
 																					     timeInfo,
 																					     statusFlags);
-	    }
+	    }//paCallback ends
 
-
+			/* This routine is called by portlineOut when playback is done.
+			*/
 	    void paStreamFinishedMethod()
 	    {
 		 		printf( "Stream Completed: %s\n", caMessage );
 	    }
-	    /*
-	     * This routine is called by portlineOut when playback is done.
-	     */
+
+			/* This routine is called by portlineOut when playback is done.
+	    */
 	    static void paStreamFinished(void* userData)
 	    {
 		 		return ((CLineOut*)userData)->paStreamFinishedMethod();

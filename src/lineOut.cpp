@@ -38,28 +38,31 @@ namespace line_out_namespace{
 	//Start the lineOut stream with default configuration
 	//A sin wave of 440Hz, with a 44100 size of SampleRate.
 	CLineOut::CLineOut() : stream(0){
-	    lineOutLeftData = &leftData;
-	    lineOutRightData = &rightData;
 	}
 
-	bool CLineOut::setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate){
-		CLineOut::iSampleRate =(__iSampleRate);
-		CLineOut::iBufferSize =(__iBufferSize);
-    for(int count=0; count < __iSampleRate; count++){
-    	leftData.push_back(0);
-    	rightData.push_back(0);
+	bool CLineOut::setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels){
+		iNumberOfChannels= (__iNumberOfChannels);
+		iSampleRate = (__iSampleRate);
+		iBufferSize = (__iBufferSize);
+
+		//Initialize vector with 0s
+    for(int iCount=0; iCount < __iSampleRate; iCount++){
+			for(int iActualChannel = 0; iActualChannel< iNumberOfChannels; iActualChannel++){
+				vfData.push_back(0);
+			}
     }
+    vpfDataPointer=&vfData;
 
 		PaStreamParameters outputParameters;
 		outputParameters.device = __index;
 		if (outputParameters.device == paNoDevice){
-		 cout << "aquí";
+		 cout << "ERROR : Device not found";
 		 return false;//device not found
 		}
 		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
 		if (pInfo != 0) printf("Output device name: '%s'\r", pInfo->name);
 
-		outputParameters.channelCount = 2;       /* stereo output */
+		outputParameters.channelCount = __iNumberOfChannels;       /* stereo output */
 		outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
 		outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
 		outputParameters.hostApiSpecificStreamInfo = NULL;
@@ -114,16 +117,16 @@ namespace line_out_namespace{
 	}
 
 	bool CLineOut::autoTest(){
-	  /*(CLineOut::lineOutLeftData)->reserve(CLineOut::iBufferSize*sizeof(float));
-	  (CLineOut::lineOutRightData)->reserve(CLineOut::iBufferSize*sizeof(float));*/
+	  /*(CLineOut::vpfDataPointer)->reserve(CLineOut::iBufferSize*sizeof(float));
+	  (CLineOut::vpfLineOutRightData)->reserve(CLineOut::iBufferSize*sizeof(float));*/
 		printf("started\n");
 		float fSine = 0;
-    for( unsigned int count=0; count<iSampleRate; count++ )
+    for( unsigned int count=0; count<iSampleRate*iNumberOfChannels; count+iNumberOfChannels )
     {
     		fSine = (float) sin( ((double)count/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* NUMBER_PI * 2. );
-        rightData[count]=(fSine);
-        //cout << rightData[i] << endl;
-        leftData[count] =(fSine);
+				for(int iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
+					vfData[count+iActualChannel] =(fSine);
+				}
     }
     printf("data created\n");
 		CLineOut::start();
@@ -135,5 +138,23 @@ namespace line_out_namespace{
 		CLineOut::close();
 		printf("closed\n");
 		return true;
+	}
+
+	int CLineOut::getSampleRate(){
+		return iSampleRate;
+	}
+
+	int CLineOut::getBufferSize(){
+		return iBufferSize;
+	}
+
+	void CLineOut::getBufferDataAdress(&(vector <float> * __data)){
+		*__data = vpfDataPointer;
+		/*vector <float> *vpfDataPointer;
+		vector <float> *vpfLineOutRightData;*/
+	}
+
+	void CLineOut:: setBufferDataAdress(vector <float> * __data){
+		vpfDataPointer= __data;
 	}
 }//CLineOut ends
