@@ -54,15 +54,15 @@ namespace line_out_namespace{
 
 			int getBufferSize();
 
-			void getBufferDataAdress(vector <float> * __data);
+			void getBufferDataAdress(vector <float> * * __data);
 
-			void setBufferDataAdress(&(vector <float> * __data));
+			void setBufferDataAdress(vector <float> * __data);
 	private:
 		//Global variables for the class.
-	    int iSampleRate;
-	    int iBufferSize;
+	    unsigned int iSampleRate;
+	    unsigned int iBufferSize;
 		  int iNumberOfChannels;
-			int iActualFrame = 0;
+			unsigned int iActualFrame = 0;
 	    char caMessage[20];
 	    PaStream *stream;
 
@@ -80,13 +80,16 @@ namespace line_out_namespace{
 							 (void) __timeInfo; /* Prevent unused variable warnings. */
 							 (void) __statusFlags;
 							 (void) __inputBuffer;
-								for(int countActual=0; countActual<__framesPerBuffer*iNumberOfChannels;countActual+iNumberOfChannels){
-										cout << "Frame actual " << iActualFrame << " de valor " << (*vpfDataPointer)[iActualFrame] << endl;
-										if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=iSampleRate*iNumberOfChannels;
-										for(int iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
-											*fpOut++=(*vpfDataPointer)[(iActualFrame)];  /* left */
+							 int iActualChannel;
+							 //THERE IS A __framesPerBuffer PER CHANNEL!!!
+							 //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
+								for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
+										cout << "Frame\t" << iActualFrame << "\tvalor\t" << ((*vpfDataPointer)[iActualFrame])<<endl ;	
+										for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){										
+											*fpOut++=(*vpfDataPointer)[iActualFrame];  /* left */
 											iActualFrame++;
 										}
+										if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=(iSampleRate*iNumberOfChannels);				
 							 }
 							 return paContinue;
 	    }//paCallbackMethod ends

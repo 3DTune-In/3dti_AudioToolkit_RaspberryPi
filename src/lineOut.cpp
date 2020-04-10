@@ -44,14 +44,15 @@ namespace line_out_namespace{
 		iNumberOfChannels= (__iNumberOfChannels);
 		iSampleRate = (__iSampleRate);
 		iBufferSize = (__iBufferSize);
-
+		
+    vpfDataPointer=&vfData;
 		//Initialize vector with 0s
-    for(int iCount=0; iCount < __iSampleRate; iCount++){
+    for(unsigned int iCount=0; iCount < iSampleRate; iCount++){
 			for(int iActualChannel = 0; iActualChannel< iNumberOfChannels; iActualChannel++){
 				vfData.push_back(0);
 			}
     }
-    vpfDataPointer=&vfData;
+
 
 		PaStreamParameters outputParameters;
 		outputParameters.device = __index;
@@ -117,15 +118,16 @@ namespace line_out_namespace{
 	}
 
 	bool CLineOut::autoTest(){
-	  /*(CLineOut::vpfDataPointer)->reserve(CLineOut::iBufferSize*sizeof(float));
-	  (CLineOut::vpfLineOutRightData)->reserve(CLineOut::iBufferSize*sizeof(float));*/
+
 		printf("started\n");
 		float fSine = 0;
-    for( unsigned int count=0; count<iSampleRate*iNumberOfChannels; count+iNumberOfChannels )
+		int iActualValue = 0;
+    for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
     {
-    		fSine = (float) sin( ((double)count/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* NUMBER_PI * 2. );
+    		fSine = (float) sin( ((double)(iCount)/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* NUMBER_PI * 2. );
 				for(int iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
-					vfData[count+iActualChannel] =(fSine);
+					vfData[iActualValue] =(fSine);
+					iActualValue++;
 				}
     }
     printf("data created\n");
@@ -136,13 +138,14 @@ namespace line_out_namespace{
 		CLineOut::stop();
 		printf("stop for %d seconds\n",NUM_SECONDS);
     Pa_Sleep( NUM_SECONDS * 1000 );
-
-		for( int count=0; count<iSampleRate; count++ )
+		iActualValue = 0;
+    for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
     {
-    		fSine = (float) sin( ((double)count/(double)iSampleRate) *(DEFAULT_TONE_FRECUENCY/2)*NUMBER_PI * 2. );
-        rightData[count]=(fSine);
-        //cout << rightData[i] << endl;
-        leftData[count] =(fSine);
+    		fSine = (float) sin( ((double)(iCount)/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* 2*NUMBER_PI * 2. );
+				for(int iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
+					vfData[iActualValue] =(fSine);
+					iActualValue++;
+				}
     }
     printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
     CLineOut::start();
@@ -163,10 +166,8 @@ namespace line_out_namespace{
 		return iBufferSize;
 	}
 
-	void CLineOut::getBufferDataAdress(&(vector <float> * __data)){
+	void CLineOut::getBufferDataAdress(vector <float> * * __data){
 		*__data = vpfDataPointer;
-		/*vector <float> *vpfDataPointer;
-		vector <float> *vpfLineOutRightData;*/
 	}
 
 	void CLineOut:: setBufferDataAdress(vector <float> * __data){
