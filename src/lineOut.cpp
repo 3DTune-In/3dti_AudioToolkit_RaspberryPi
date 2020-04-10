@@ -129,14 +129,29 @@ namespace line_out_namespace{
 				}
     }
     printf("data created\n");
-		CLineOut::start();
 
-    printf("playing\n");
+    printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
+		CLineOut::start();
 		Pa_Sleep( NUM_SECONDS * 1000 );
+		CLineOut::stop();
+		printf("stop for %d seconds\n",NUM_SECONDS);
+    Pa_Sleep( NUM_SECONDS * 1000 );
+
+		for( int count=0; count<iSampleRate; count++ )
+    {
+    		fSine = (float) sin( ((double)count/(double)iSampleRate) *(DEFAULT_TONE_FRECUENCY/2)*NUMBER_PI * 2. );
+        rightData[count]=(fSine);
+        //cout << rightData[i] << endl;
+        leftData[count] =(fSine);
+    }
+    printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
+    CLineOut::start();
+    Pa_Sleep( NUM_SECONDS * 1000 );
 		CLineOut::stop();
 		printf("stopped\n");
 		CLineOut::close();
 		printf("closed\n");
+		printf("Test finished! Good job!");
 		return true;
 	}
 

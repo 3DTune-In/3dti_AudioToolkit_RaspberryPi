@@ -42,7 +42,6 @@ namespace line_out_namespace{
       bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
 			//Close the lineOut device of this lineOut variable.
 	   	bool close();
-
 			//Start the lineOut streaming.
 	  	bool start();
 			//Stop the lineOut streaming.
@@ -92,7 +91,7 @@ namespace line_out_namespace{
 							 return paContinue;
 	    }//paCallbackMethod ends
 
-	    /* This routine will be called by the PortlineOut engine when lineOut is needed.
+	    /* This routine will be called by the PortlineOut engine when CLineOut is needed.
 	    ** It may called at interrupt level on some machines so don't do anything
 	    ** that could mess up the system like calling malloc() or free().
 	    */
@@ -102,7 +101,7 @@ namespace line_out_namespace{
 														 PaStreamCallbackFlags statusFlags,
 														 void *userData )
 	    {
-					 /* Here we cast userData to Sine* type so we can call the instance method paCallbackMethod, we can do that since
+					 /* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
 					    we called Pa_OpenStream with 'this' for userData */
 					 return ((CLineOut*)userData)->paCallbackMethod(inputBuffer, outputBuffer,
 																					     framesPerBuffer,

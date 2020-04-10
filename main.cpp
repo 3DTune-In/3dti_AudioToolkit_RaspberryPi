@@ -44,13 +44,14 @@ int main(void)
 {
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) cout << "ERROR : No se ha podido iniciar portaudio";
-    printf("creator\n");
     CLineOut TestLine;
-    printf("setup\n");
     cout << "Dispositivo principal numero " << Pa_GetDefaultOutputDevice() << endl;
-    if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, SAMPLE_RATE, NUM_CHANNELS)) cout << "ERROR : El setup no ha ido bien..." << endl;
-    printf("autotest\n");
+    if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, SAMPLE_RATE)){
+       cout << "ERROR : El setup no ha ido bien" << endl;
+       exit(1);
+    }
+    printf("Starting autotest\n");
     if(!TestLine.autoTest()) cout << "Error 3" << endl;
-    printf("Test finished.\n");
+    printf("Program finished.\n");
     return 0;
 }
