@@ -1,8 +1,12 @@
 # 3DTI AudioToolkit in RaspberryPi
-This is a deployment of the 3D Tune-In Audiotoolkit in Raspberry Pi based devices. The project makes audio spatialitation portable with the help of a raspberry based SoC, a battery, headphones and a TFT screen or similar. 
+3dti_AudioToolkit_RaspberryPi is a deployment of the 3D Tune-In Toolkit (https://github.com/3DTune-In/3dti_AudioToolkit) in Raspberry Pi based devices. The project makes audio spatialitation portable with the help of a raspberry based SoC, a battery, headphones and a TFT screen or similar. 
+
+For a description of the 3D Tune-In Toolkit, see: 
+
+Cuevas-Rodríguez M, Picinali L, González-Toledo D, Garre C, de la Rubia-Cuestas E, Molina-Tanco L and Reyes-Lecuona A. (2019) 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. PLOS ONE 14(3): e0211899. https://doi.org/10.1371/journal.pone.0211899This 
 
 # Authors
-This project is being developed by Gonzalo bueno Santana as his BEng Thesis (TFG), under the supervision of Arcadio Reyes Lecuona
+This project is being developed by Gonzalo Alfonso Bueno Santana as his Bachelor Thesis (TFG), for the BEng Electronic Engineering Degree at the University of Malaga, School of Telecommunication (http://etsit.uma.es/), under the supervision of Arcadio Reyes Lecuona, 
 
 # Compile the project
 To compile the project run on linux that:
