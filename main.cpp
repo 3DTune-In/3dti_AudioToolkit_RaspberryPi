@@ -20,17 +20,19 @@
 
 /*! \file */
 
-#include <stdio.h>
-#include <math.h>
+#include "./src/thirdPartyLibs/loguru/loguru.cpp"
 #include "./src/lineOut/portaudio.h"
 #include "./src/lineOut/lineOut.hpp"
-#include<vector> // for array, at()
-#include <iostream>
 
 #define NUM_SECONDS       	(1) 		//For each tone.
 #define SAMPLE_RATE       	(44100)	//22050) //(44100)
 #define FRAMES_PER_BUFFER  	(1024)
 #define NUM_CHANNELS        (2)
+
+#include <stdio.h>
+#include <math.h>
+#include<vector> // for array, at()
+#include <iostream>
 
 using namespace line_out_namespace;
 
@@ -40,8 +42,7 @@ int main(void);
 
 /*******************************************************************/
 
-int main(void)
-{
+int main(void){
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) cout << "ERROR : No se ha podido iniciar portaudio";
     CLineOut TestLine;
@@ -51,7 +52,7 @@ int main(void)
        exit(1);
     }
     printf("Starting autotest\n");
-    if(!TestLine.autoTest()) cout << "Error 3" << endl;
+    if(!TestLine.autoTest()) cout << "ERROR : Autotest fail..." << endl;
     printf("Program finished.\n");
 
     return 0;
