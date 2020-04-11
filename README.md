@@ -1,5 +1,8 @@
-# TFG-PortableAudiospatialization
-An audio spatialitation project centered in Raspberry Pi based devices. The project makes audio spatialitation portable with the help of a raspberry based SoC, a battery, headphones and a TFT screen or similar. It use 3DTI-TK library to make the process.
+# 3DTI AudioToolkit in RaspberryPi
+This is a deployment of the 3D Tune-In Audiotoolkit in Raspberry Pi based devices. The project makes audio spatialitation portable with the help of a raspberry based SoC, a battery, headphones and a TFT screen or similar. 
+
+# Authors
+This project is being developed by Gonzalo bueno Santana as his BEng Thesis (TFG), under the supervision of Arcadio Reyes Lecuona
 
 # Compile the project
 To compile the project run on linux that:
