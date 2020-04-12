@@ -36,6 +36,7 @@
 #include <math.h>
 #include "portaudio.h"
 #include <iostream>
+//#include "./thirdPartyLibs/loguru/loguru.cpp"
 using namespace std;
 
 #define DEFAULT_TONE_FRECUENCY 880
@@ -64,11 +65,11 @@ namespace line_out_namespace{
 		PaStreamParameters outputParameters;
 		outputParameters.device = __index;
 		if (outputParameters.device == paNoDevice){
-		 cout << "ERROR : Device not found";
+		 LOG_F(ERROR,"ERROR : Device not found");
 		 return false;//device not found
 		}
 		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
-		if (pInfo != 0) printf("Output device name: '%s'\r", pInfo->name);
+		if (pInfo != 0) LOG_F(INFO,"Output device name: '%s'\r", pInfo->name);
 
 		outputParameters.channelCount = __iNumberOfChannels;       /* stereo output */
 		outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
@@ -86,8 +87,10 @@ namespace line_out_namespace{
 															 this            /* Using 'this' for userData so we can cast to lineOut* in paCallback method */
 															 );
 
-		if (err != paNoError) return false;	 /* Failed to open stream to device !!! */
-
+		if (err != paNoError){
+		 LOG_F(ERROR, "Failed opening the stream device");
+		 return false;	 /* Failed to open stream to device !!! */
+		}
 		err = Pa_SetStreamFinishedCallback( CLineOut::stream, &CLineOut::paStreamFinished );
 		if (err != paNoError)
 		{
@@ -126,7 +129,7 @@ namespace line_out_namespace{
 
 	bool CLineOut::autoTest(){
 
-		printf("started\n");
+		LOG_F(2,"started\n");
 		float fSine = 0;
 		int iActualValue = 0;
     for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
@@ -137,13 +140,13 @@ namespace line_out_namespace{
 					iActualValue++;
 				}
     }
-    printf("data created\n");
+    LOG_F(2,"data created");
 
-    printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
+    LOG_F(INFO,"playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
 		CLineOut::start();
 		Pa_Sleep( NUM_SECONDS * 1000 );
 		CLineOut::stop();
-		printf("stop for %d seconds\n",NUM_SECONDS);
+	  LOG_F(INFO,"stop for %d seconds\n",NUM_SECONDS);
     Pa_Sleep( NUM_SECONDS * 1000 );
 		iActualValue = 0;
     for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
@@ -154,14 +157,14 @@ namespace line_out_namespace{
 					iActualValue++;
 				}
     }
-    printf("playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
+    LOG_F(INFO,"playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
     CLineOut::start();
     Pa_Sleep( NUM_SECONDS * 1000 );
 		CLineOut::stop();
-		printf("stopped\n");
+		LOG_F(INFO,"stopped\n");
 		CLineOut::close();
-		printf("closed\n");
-		printf("Test finished! Good job!");
+		LOG_F(INFO,"closed\n");
+		LOG_F(INFO,"Test finished! Good job!");
 		return true;
 	}
 

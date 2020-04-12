@@ -7,17 +7,23 @@
 *
 * \authors: Gonzalo Alfonso Bueno Santana
 * \b Contact : gonzupi6@gmail.com
-* Coordinated by , A. Reyes-Lecuona (University of Malaga)
+* Supervised by , A. Reyes-Lecuona (University of Malaga)
 * \b Contact: areyes@uma.es
 *
 * \b Contributions: (additional authors/contributors can be added here)
 *
-* \b Project: 3DTI (3D-games for TUNing and lEarnINg about hearing aids) ||
-* \b Website: http://3d-tune-in.eu/
+* \b Project: 3dti_AudioToolkit_RaspberryPi is a deployment of the 3D Tune-In Toolkit (https://github.com/3DTune-In/3dti_AudioToolkit) 
+* in Raspberry Pi based devices. It is developed by Gonzalo Alfonso bueno Santana as his Bachelor Thesis in the BEng Electronic Engineering Degree
+* at the University of Malaga, School of Telecommunication (http://etsit.uma.es/)
+* For a description of the 3D Tune-In Toolkit, see: 
+* Cuevas-Rodríguez M, Picinali L, González-Toledo D, Garre C, de la Rubia-Cuestas E, Molina-Tanco L and Reyes-Lecuona A. (2019) 
+* 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. PLOS ONE 14(3): e0211899. 
+* https://doi.org/10.1371/journal.pone.0211899
+*
+* \b Website: https://github.com/3DTune-In/3dti_AudioToolkit_RaspberryPi
 *
 * \b Copyright: University of Malaga - 2020
 */
-
 
 /*! \file */
 
@@ -28,6 +34,7 @@
 #include<tuple> // for get()
 #include "portaudio.h"
 #include <iostream>
+#include "./thirdPartyLibs/loguru/loguru.hpp"
 using namespace std;
 
 namespace line_out_namespace{
@@ -35,28 +42,26 @@ namespace line_out_namespace{
 		{
 		public:
 			//Start the lineOut stream with default configuration
-			//A sin wave of 440Hz, with a 44100 size of SampleRate.
 			CLineOut();
-			//Open an lineOut device and configure it to be used with a "bufferSize"
 			//User needs to execute this before "start" function
       bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
-			//Close the lineOut device of this lineOut variable.
+			//Close the lineOut device of this lineOut variable. If the class is closed you cant start or stop it.
 	   	bool close();
 			//Start the lineOut streaming.
 	  	bool start();
 			//Stop the lineOut streaming.
 	 		bool stop();
 
-			//play a #A4 440Hz for one second
+			//play a #A5 880Hz for one second, stop one second and then, play a #A4 440Hz for another second.
 			bool autoTest();
 
 			int getSampleRate();
-
 			int getBufferSize();
-
 			void getBufferDataAdress(vector <float> * * __data);
-
 			void setBufferDataAdress(vector <float> * __data);
+			
+	/*******************************************************************************************/
+	
 	private:
 		//Global variables for the class.
 	    unsigned int iSampleRate;
@@ -65,7 +70,6 @@ namespace line_out_namespace{
 			unsigned int iActualFrame = 0;
 	    char caMessage[20];
 	    PaStream *stream;
-
 	    vector <float> *vpfDataPointer;
 	    vector <float> *vpfLineOutRightData;
 	    vector <float> vfData;
@@ -84,7 +88,6 @@ namespace line_out_namespace{
 							 //THERE IS A __framesPerBuffer PER CHANNEL!!!
 							 //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
 								for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-										cout << "Frame\t" << iActualFrame << "\tvalor\t" << ((*vpfDataPointer)[iActualFrame])<<endl ;	
 										for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){										
 											*fpOut++=(*vpfDataPointer)[iActualFrame];  /* left */
 											iActualFrame++;
@@ -116,9 +119,8 @@ namespace line_out_namespace{
 			*/
 	    void paStreamFinishedMethod()
 	    {
-		 		printf( "Stream Completed: %s\n", caMessage );
+		 		LOG_F( INFO,"Stream Completed: %s\n", caMessage );
 	    }
-
 			/* This routine is called by portlineOut when playback is done.
 	    */
 	    static void paStreamFinished(void* userData)
@@ -127,6 +129,8 @@ namespace line_out_namespace{
 	    }
 
 	};//CLineOut ends
+	/*******************************************************************************************/
+	
 	class ScopedPaHandler
   {
     public:
