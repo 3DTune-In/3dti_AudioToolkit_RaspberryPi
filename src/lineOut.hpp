@@ -12,12 +12,12 @@
 *
 * \b Contributions: (additional authors/contributors can be added here)
 *
-* \b Project: 3dti_AudioToolkit_RaspberryPi is a deployment of the 3D Tune-In Toolkit (https://github.com/3DTune-In/3dti_AudioToolkit) 
+* \b Project: 3dti_AudioToolkit_RaspberryPi is a deployment of the 3D Tune-In Toolkit (https://github.com/3DTune-In/3dti_AudioToolkit)
 * in Raspberry Pi based devices. It is developed by Gonzalo Alfonso bueno Santana as his Bachelor Thesis in the BEng Electronic Engineering Degree
 * at the University of Malaga, School of Telecommunication (http://etsit.uma.es/)
-* For a description of the 3D Tune-In Toolkit, see: 
-* Cuevas-Rodríguez M, Picinali L, González-Toledo D, Garre C, de la Rubia-Cuestas E, Molina-Tanco L and Reyes-Lecuona A. (2019) 
-* 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. PLOS ONE 14(3): e0211899. 
+* For a description of the 3D Tune-In Toolkit, see:
+* Cuevas-Rodríguez M, Picinali L, González-Toledo D, Garre C, de la Rubia-Cuestas E, Molina-Tanco L and Reyes-Lecuona A. (2019)
+* 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. PLOS ONE 14(3): e0211899.
 * https://doi.org/10.1371/journal.pone.0211899
 *
 * \b Website: https://github.com/3DTune-In/3dti_AudioToolkit_RaspberryPi
@@ -41,34 +41,28 @@ namespace line_out_namespace{
 	class CLineOut
 		{
 		public:
-			//Start the lineOut stream with default configuration
 			CLineOut();
-			//User needs to execute this before "start" function
       bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
-			//Close the lineOut device of this lineOut variable. If the class is closed you cant start or stop it.
 	   	bool close();
-			//Start the lineOut streaming.
 	  	bool start();
-			//Stop the lineOut streaming.
-	 		bool stop();
-
-			//play a #A5 880Hz for one second, stop one second and then, play a #A4 440Hz for another second.
+	 		bool pause();
+			//play a #A5 880Hz for one second, pause one second and then, play a #A4 440Hz for another second.
 			bool autoTest();
-
+			
 			int getSampleRate();
 			int getBufferSize();
 			void getBufferDataAdress(vector <float> * * __data);
 			void setBufferDataAdress(vector <float> * __data);
-			
+
 	/*******************************************************************************************/
-	
+
 	private:
 		//Global variables for the class.
 	    unsigned int iSampleRate;
 	    unsigned int iBufferSize;
 		  int iNumberOfChannels;
 			unsigned int iActualFrame = 0;
-	    char caMessage[20];
+	    char caMessage[20] = "Sound stop";
 	    PaStream *stream;
 	    vector <float> *vpfDataPointer;
 	    vector <float> *vpfLineOutRightData;
@@ -88,11 +82,11 @@ namespace line_out_namespace{
 							 //THERE IS A __framesPerBuffer PER CHANNEL!!!
 							 //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
 								for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-										for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){										
+										for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
 											*fpOut++=(*vpfDataPointer)[iActualFrame];  /* left */
 											iActualFrame++;
 										}
-										if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=(iSampleRate*iNumberOfChannels);				
+										if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=(iSampleRate*iNumberOfChannels);
 							 }
 							 return paContinue;
 	    }//paCallbackMethod ends
@@ -119,7 +113,7 @@ namespace line_out_namespace{
 			*/
 	    void paStreamFinishedMethod()
 	    {
-		 		LOG_F( INFO,"Stream Completed: %s\n", caMessage );
+		 		LOG_F( INFO,"Stream Completed: %s", caMessage );
 	    }
 			/* This routine is called by portlineOut when playback is done.
 	    */
@@ -130,24 +124,18 @@ namespace line_out_namespace{
 
 	};//CLineOut ends
 	/*******************************************************************************************/
-	
+
 	class ScopedPaHandler
   {
     public:
-        ScopedPaHandler()
-       : _result(Pa_Initialize())
-        {
+        ScopedPaHandler(): _result(Pa_Initialize()){
         }
-        ~ScopedPaHandler()
-        {
-       if (_result == paNoError)
-       {
-           Pa_Terminate();
-       }
+        ~ScopedPaHandler(){
+		       if (_result == paNoError){
+		           Pa_Terminate();
+		       }
         }
-
         PaError result() const { return _result; }
-
     private:
         PaError _result;
   };

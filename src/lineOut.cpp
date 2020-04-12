@@ -12,12 +12,12 @@
 *
 * \b Contributions: (additional authors/contributors can be added here)
 *
-* \b Project: 3dti_AudioToolkit_RaspberryPi is a deployment of the 3D Tune-In Toolkit (https://github.com/3DTune-In/3dti_AudioToolkit) 
+* \b Project: 3dti_AudioToolkit_RaspberryPi is a deployment of the 3D Tune-In Toolkit (https://github.com/3DTune-In/3dti_AudioToolkit)
 * in Raspberry Pi based devices. It is developed by Gonzalo Alfonso bueno Santana as his Bachelor Thesis in the BEng Electronic Engineering Degree
 * at the University of Malaga, School of Telecommunication (http://etsit.uma.es/)
-* For a description of the 3D Tune-In Toolkit, see: 
-* Cuevas-Rodríguez M, Picinali L, González-Toledo D, Garre C, de la Rubia-Cuestas E, Molina-Tanco L and Reyes-Lecuona A. (2019) 
-* 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. PLOS ONE 14(3): e0211899. 
+* For a description of the 3D Tune-In Toolkit, see:
+* Cuevas-Rodríguez M, Picinali L, González-Toledo D, Garre C, de la Rubia-Cuestas E, Molina-Tanco L and Reyes-Lecuona A. (2019)
+* 3D Tune-In Toolkit: An open-source library for real-time binaural spatialisation. PLOS ONE 14(3): e0211899.
 * https://doi.org/10.1371/journal.pone.0211899
 *
 * \b Website: https://github.com/3DTune-In/3dti_AudioToolkit_RaspberryPi
@@ -52,7 +52,7 @@ namespace line_out_namespace{
 		iNumberOfChannels= (__iNumberOfChannels);
 		iSampleRate = (__iSampleRate);
 		iBufferSize = (__iBufferSize);
-		
+
     vpfDataPointer=&vfData;
 		//Initialize vector with 0s
     for(unsigned int iCount=0; iCount < iSampleRate; iCount++){
@@ -69,7 +69,7 @@ namespace line_out_namespace{
 		 return false;//device not found
 		}
 		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
-		if (pInfo != 0) LOG_F(INFO,"Output device name: '%s'\r", pInfo->name);
+		if (pInfo != 0) LOG_F(INFO,"Output device name: '%s'", pInfo->name);
 
 		outputParameters.channelCount = __iNumberOfChannels;       /* stereo output */
 		outputParameters.sampleFormat = paFloat32; /* 32 bit floating point output */
@@ -105,7 +105,6 @@ namespace line_out_namespace{
 	bool CLineOut::close()
 	{
 	    if (CLineOut::stream == 0) return false;
-
 	    PaError err = Pa_CloseStream( CLineOut::stream );
 	    CLineOut::stream = 0;
 	    return (err == paNoError);
@@ -119,8 +118,8 @@ namespace line_out_namespace{
 	    return (err == paNoError);
 	}
 
-	//Stop the lineOut streaming.
-	bool CLineOut::stop()
+	//pause the lineOut streaming.
+	bool CLineOut::pause()
 	{
 	    if (CLineOut::stream == 0) return false;
 	    PaError err = Pa_StopStream( CLineOut::stream );
@@ -129,7 +128,7 @@ namespace line_out_namespace{
 
 	bool CLineOut::autoTest(){
 
-		LOG_F(2,"started\n");
+		LOG_F(2,"started");
 		float fSine = 0;
 		int iActualValue = 0;
     for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
@@ -142,11 +141,11 @@ namespace line_out_namespace{
     }
     LOG_F(2,"data created");
 
-    LOG_F(INFO,"playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
+    LOG_F(INFO,"playing %d Hz for %d seconds...",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
 		CLineOut::start();
 		Pa_Sleep( NUM_SECONDS * 1000 );
-		CLineOut::stop();
-	  LOG_F(INFO,"stop for %d seconds\n",NUM_SECONDS);
+	  LOG_F(INFO,"pause for %d seconds",NUM_SECONDS);
+		CLineOut::pause();
     Pa_Sleep( NUM_SECONDS * 1000 );
 		iActualValue = 0;
     for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
@@ -157,13 +156,13 @@ namespace line_out_namespace{
 					iActualValue++;
 				}
     }
-    LOG_F(INFO,"playing %d Hz for %d seconds...\n",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
+    LOG_F(INFO,"playing %d Hz for %d seconds...",DEFAULT_TONE_FRECUENCY/2,NUM_SECONDS);
     CLineOut::start();
     Pa_Sleep( NUM_SECONDS * 1000 );
-		CLineOut::stop();
-		LOG_F(INFO,"stopped\n");
+		CLineOut::pause();
+		LOG_F(INFO,"pause");
 		CLineOut::close();
-		LOG_F(INFO,"closed\n");
+		LOG_F(INFO,"closed");
 		LOG_F(INFO,"Test finished! Good job!");
 		return true;
 	}
