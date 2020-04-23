@@ -148,10 +148,11 @@ namespace line_out_namespace{
 		CLineOut::pause();
     Pa_Sleep( NUM_SECONDS * 1000 );
 		iActualValue = 0;
+
     for(unsigned int iCount=0; iCount<iSampleRate; iCount++)
     {
-    		fSine = (float) sin( ((double)(iCount)/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY* 2*NUMBER_PI * 2. );
 				for(int iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
+				  fSine = (float) sin( ((double)(iCount)/(double)iSampleRate) *DEFAULT_TONE_FRECUENCY/(iActualChannel+2)* 2*NUMBER_PI * 2. );
 					vfData[iActualValue] =(fSine);
 					iActualValue++;
 				}
