@@ -31,12 +31,14 @@
 #include "./src/thirdPartyLibs/loguru/loguru.cpp"
 #include "./src/portaudio.h"
 #include "./src/lineOut.hpp"
+#include "src/thirdPartyLibs/AudioFile/AudioFile.h"
 
 #define NUM_SECONDS       	(1) 		//For each tone.
 #define SAMPLE_RATE       	(44100)	//22050) //(44100)
 #define FRAMES_PER_BUFFER  	(1024)
 #define NUM_CHANNELS        (2)
 const char LOG_FOLDER[20] = "./general.log";
+const char WAV_PATH[120] = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
 
 #include <stdio.h>
 #include <math.h>
@@ -56,6 +58,10 @@ int main(int argc, char* argv[]){
 		loguru::init(argc,argv);
 		// Put every log message in "everything.log":
 	  loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
+	  AudioFile<double> audioFile;
+	  audioFile.load (WAV_PATH);
+	  
+	  
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) {
     	LOG_F(ERROR,"ERROR : No se ha podido iniciar portaudio");
