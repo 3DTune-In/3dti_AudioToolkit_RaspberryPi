@@ -34,9 +34,7 @@
 #include "src/thirdPartyLibs/AudioFile/AudioFile.h"
 
 #define NUM_SECONDS       	(1) 		//For each tone.
-#define SAMPLE_RATE       	(44100)	//22050) //(44100)
-#define FRAMES_PER_BUFFER  	(1024)
-#define NUM_CHANNELS        (2)
+#define FRAMES_PER_BUFFER  	(512)
 const char LOG_FOLDER[20] = "./general.log";
 const char WAV_PATH[120] = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
 
@@ -60,7 +58,10 @@ int main(int argc, char* argv[]){
 	  loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
 	  AudioFile<double> audioFile;
 	  audioFile.load (WAV_PATH);
-	  
+		int WAVSampleRate = audioFile.getSampleRate();
+		int numChannels = audioFile.getNumChannels();
+		if(numChannels > 2) numChannels = 2;
+		LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", numChannels, WAVSampleRate);	  
 	  
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) {
@@ -69,7 +70,7 @@ int main(int argc, char* argv[]){
     }
     CLineOut TestLine;
     LOG_F(2, "Configurando la salida de audio.");
-    if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, SAMPLE_RATE, NUM_CHANNELS)){
+    if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, numChannels)){
        LOG_F(ERROR,"ERROR : El setup no ha ido bien");
        exit(1);
     }

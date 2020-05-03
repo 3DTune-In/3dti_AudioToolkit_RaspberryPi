@@ -2,7 +2,7 @@
 CFLAGS =-lrt -lm -lasound -ljack -pthread -ldl -std=c++11
 LIB_FOLDER =./src
 THIRD_PARTY_FOLDER= ./src/thirdPartyLibs
-EXECUTABLE_NAME =YOUR_BINARY
+EXECUTABLE_NAME = PortableAudiospatialization
 
 output: main.o ${LIB_FOLDER}/lineOut.o ${THIRD_PARTY_FOLDER}/loguru/loguru.o
 	g++ main.o ${LIB_FOLDER}/lineOut.o ${LIB_FOLDER}/libportaudio.a  ${LIB_FOLDER}/portaudio.h ${CFLAGS} -o ${EXECUTABLE_NAME}
