@@ -42,12 +42,16 @@ namespace line_out_namespace{
 		{
 		public:
 			CLineOut();
-      bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
+      bool defaultSetup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
+      bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels,  
+    																	int (*__paCallback)( const void *, void *,unsigned long ,
+																													const PaStreamCallbackTimeInfo* ,PaStreamCallbackFlags ,
+																													void * ));
 	   	bool close();
 	  	bool start();
 	 		bool pause();
 			//play a #A5 880Hz for one second, pause one second and then, play a #A4 440Hz for another second.
-			bool autoTest();
+			bool autoTest();//Close the stream at finish;
 			
 			int getSampleRate();
 			int getBufferSize();

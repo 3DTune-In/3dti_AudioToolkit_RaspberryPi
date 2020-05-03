@@ -3,3 +3,4 @@ YOUR_BINARY*
 ./src/lineOut/libportaudio.a
 ./src/lineOut/libportaudio.h
 ./*.log
+*.o

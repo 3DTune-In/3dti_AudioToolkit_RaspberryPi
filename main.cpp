@@ -37,7 +37,11 @@
 #define FRAMES_PER_BUFFER  	(512)
 const char LOG_FOLDER[20] = "./general.log";
 const char WAV_PATH[120] = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
-
+AudioFile<double> audioFile;
+int iNumChannels;
+int WAVSampleRate;
+int totalNumSamples;
+int iActualFrame=0;
 #include <stdio.h>
 #include <math.h>
 #include<vector>
@@ -46,7 +50,12 @@ const char WAV_PATH[120] = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/
 using namespace line_out_namespace;
 
 /*******************************************************************/
-
+static int mainCallback( const void *inputBuffer, void *outputBuffer,
+														 unsigned long framesPerBuffer,
+														 const PaStreamCallbackTimeInfo* timeInfo,
+														 PaStreamCallbackFlags statusFlags,
+														 void *userData );
+														 
 int main(int argc, char* argv[]);
 
 /*******************************************************************/
@@ -56,12 +65,14 @@ int main(int argc, char* argv[]){
 		loguru::init(argc,argv);
 		// Put every log message in "everything.log":
 	  loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
-	  AudioFile<double> audioFile;
+	  
 	  audioFile.load (WAV_PATH);
-		int WAVSampleRate = audioFile.getSampleRate();
-		int numChannels = audioFile.getNumChannels();
-		if(numChannels > 2) numChannels = 2;
-		LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", numChannels, WAVSampleRate);	  
+		WAVSampleRate = audioFile.getSampleRate();
+		iNumChannels = audioFile.getNumChannels();
+		totalNumSamples = audioFile.getNumSamplesPerChannel();
+		
+		if(iNumChannels > 2) iNumChannels = 2;
+		LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, WAVSampleRate);	  
 	  
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) {
@@ -70,13 +81,62 @@ int main(int argc, char* argv[]){
     }
     CLineOut TestLine;
     LOG_F(2, "Configurando la salida de audio.");
-    if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, numChannels)){
+    if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, iNumChannels)){
        LOG_F(ERROR,"ERROR : El setup no ha ido bien");
        exit(1);
     }
     LOG_F(2,"Empezando el autotest.");
     if(!TestLine.autoTest()) LOG_F(ERROR,"ERROR : Autotest falló.");
     LOG_F(INFO,"Saliendo del programa.");
-
+		
+		if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, iNumChannels, *mainCallback)){
+       LOG_F(ERROR,"ERROR : El setup no ha ido bien");
+       exit(1);
+    }
+    LOG_F(2,"started wav setup");
+    
+    TestLine.start();
+		Pa_Sleep( 5 * 1000 );
+	  LOG_F(INFO,"pause for %d seconds",5);
+		TestLine.pause();
+		TestLine.close();
     return 0;
 }
+
+
+
+int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
+					 unsigned long __framesPerBuffer,
+					 const PaStreamCallbackTimeInfo* __timeInfo,
+					 PaStreamCallbackFlags __statusFlags){
+							 float * fpOut = (float*)__outputBuffer;
+							 (void) __timeInfo; /* Prevent unused variable warnings. */
+							 (void) __statusFlags;
+							 (void) __inputBuffer;
+							 int iActualChannel;
+							 //THERE IS A __framesPerBuffer PER CHANNEL!!!
+							 //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
+								for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
+										for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
+											if(iActualFrame < totalNumSamples){
+												*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
+												iActualFrame++;
+											}else iActualFrame = 0;
+										}
+							 }
+							 return paContinue;
+}//paCallbackMethod ends
+
+static int mainCallback( const void *inputBuffer, void *outputBuffer,
+														 unsigned long framesPerBuffer,
+														 const PaStreamCallbackTimeInfo* timeInfo,
+														 PaStreamCallbackFlags statusFlags,
+														 void *userData )
+{
+					 /* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
+					    we called Pa_OpenStream with 'this' for userData */
+					 return mainCallbackMethod(inputBuffer, outputBuffer,
+																					     framesPerBuffer,
+																					     timeInfo,
+																					     statusFlags);
+}//paCallback ends
