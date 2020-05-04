@@ -51,10 +51,8 @@ using namespace line_out_namespace;
 
 /*******************************************************************/
 static int mainCallback( const void *inputBuffer, void *outputBuffer,
-														 unsigned long framesPerBuffer,
-														 const PaStreamCallbackTimeInfo* timeInfo,
-														 PaStreamCallbackFlags statusFlags,
-														 void *userData );
+						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+						PaStreamCallbackFlags statusFlags,void *userData );
 														 
 int main(int argc, char* argv[]);
 
@@ -62,17 +60,17 @@ int main(int argc, char* argv[]);
 
 
 int main(int argc, char* argv[]){
-		loguru::init(argc,argv);
-		// Put every log message in "everything.log":
-	  loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
+	loguru::init(argc,argv);
+	// Put every log message in "everything.log":
+	loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
 	  
-	  audioFile.load (WAV_PATH);
-		WAVSampleRate = audioFile.getSampleRate();
-		iNumChannels = audioFile.getNumChannels();
-		totalNumSamples = audioFile.getNumSamplesPerChannel();
+	audioFile.load (WAV_PATH);
+	WAVSampleRate = audioFile.getSampleRate();
+	iNumChannels = audioFile.getNumChannels();
+	totalNumSamples = audioFile.getNumSamplesPerChannel();
 		
-		if(iNumChannels > 2) iNumChannels = 2;
-		LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, WAVSampleRate);	  
+	if(iNumChannels > 2) iNumChannels = 2;
+	LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, WAVSampleRate);	  
 	  
     ScopedPaHandler paInit;
     if(paInit.result() != paNoError) {
@@ -106,37 +104,32 @@ int main(int argc, char* argv[]){
 
 
 int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
-					 unsigned long __framesPerBuffer,
-					 const PaStreamCallbackTimeInfo* __timeInfo,
-					 PaStreamCallbackFlags __statusFlags){
-							 float * fpOut = (float*)__outputBuffer;
-							 (void) __timeInfo; /* Prevent unused variable warnings. */
-							 (void) __statusFlags;
-							 (void) __inputBuffer;
-							 int iActualChannel;
-							 //THERE IS A __framesPerBuffer PER CHANNEL!!!
-							 //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
-								for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-										for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
-											if(iActualFrame < totalNumSamples){
-												*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
-												iActualFrame++;
-											}else iActualFrame = 0;
-										}
-							 }
-							 return paContinue;
+				unsigned long __framesPerBuffer, const PaStreamCallbackTimeInfo* __timeInfo,
+				PaStreamCallbackFlags __statusFlags){
+	float * fpOut = (float*)__outputBuffer;
+	(void) __timeInfo; /* Prevent unused variable warnings. */
+	(void) __statusFlags;
+	(void) __inputBuffer;
+	int iActualChannel;
+	//THERE IS A __framesPerBuffer PER CHANNEL!!!
+	//fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
+	for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
+			for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
+				if(iActualFrame < totalNumSamples){
+					*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
+					iActualFrame++;
+				}else iActualFrame = 0;
+			}
+	}
+	return paContinue;
 }//paCallbackMethod ends
 
 static int mainCallback( const void *inputBuffer, void *outputBuffer,
-														 unsigned long framesPerBuffer,
-														 const PaStreamCallbackTimeInfo* timeInfo,
-														 PaStreamCallbackFlags statusFlags,
-														 void *userData )
+						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+						PaStreamCallbackFlags statusFlags,void *userData )
 {
-					 /* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
-					    we called Pa_OpenStream with 'this' for userData */
-					 return mainCallbackMethod(inputBuffer, outputBuffer,
-																					     framesPerBuffer,
-																					     timeInfo,
-																					     statusFlags);
+	/* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
+	we called Pa_OpenStream with 'this' for userData */
+	return mainCallbackMethod(inputBuffer, outputBuffer,
+							framesPerBuffer,timeInfo,statusFlags);
 }//paCallback ends

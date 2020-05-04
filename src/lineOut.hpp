@@ -42,13 +42,11 @@ namespace line_out_namespace{
 		{
 		public:
 			CLineOut();
-      bool defaultSetup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
-      bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels,  
-    																	int (*__paCallback)( const void *, void *,unsigned long ,
-																													const PaStreamCallbackTimeInfo* ,PaStreamCallbackFlags ,
-																													void * ));
-	   	bool close();
-	  	bool start();
+      		bool defaultSetup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
+      		bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels 
+					,int (*__paCallback)( const void *, void *,unsigned long ,const PaStreamCallbackTimeInfo* ,PaStreamCallbackFlags ,void * ));
+	   		bool close();
+	  		bool start();
 	 		bool pause();
 			//play a #A5 880Hz for one second, pause one second and then, play a #A4 440Hz for another second.
 			bool autoTest();//Close the stream at finish;
@@ -64,8 +62,8 @@ namespace line_out_namespace{
 		//Global variables for the class.
 	    unsigned int iSampleRate;
 	    unsigned int iBufferSize;
-		  int iNumberOfChannels;
-			unsigned int iActualFrame = 0;
+		int iNumberOfChannels;
+		unsigned int iActualFrame = 0;
 	    char caMessage[20] = "Sound stop";
 	    PaStream *stream;
 	    vector <float> *vpfDataPointer;
@@ -73,7 +71,7 @@ namespace line_out_namespace{
 	    vector <float> vfData;
 	    vector <float> vfRightData;
 
-			//This callback is called when the system need to, the stram is opened and started.
+		//This callback is called when the system need to, the stram is opened and started.
 	    int paCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 					 unsigned long __framesPerBuffer,
 					 const PaStreamCallbackTimeInfo* __timeInfo,
@@ -113,14 +111,13 @@ namespace line_out_namespace{
 																					     statusFlags);
 	    }//paCallback ends
 
-			/* This routine is called by portlineOut when playback is done.
-			*/
+		// This routine is called by portlineOut when playback is done.	
 	    void paStreamFinishedMethod()
 	    {
 		 		LOG_F( INFO,"Stream Completed: %s", caMessage );
 	    }
-			/* This routine is called by portlineOut when playback is done.
-	    */
+		
+		// This routine is called by portlineOut when playback is done.
 	    static void paStreamFinished(void* userData)
 	    {
 		 		return ((CLineOut*)userData)->paStreamFinishedMethod();
@@ -129,19 +126,18 @@ namespace line_out_namespace{
 	};//CLineOut ends
 	/*******************************************************************************************/
 
-	class ScopedPaHandler
-  {
-    public:
-        ScopedPaHandler(): _result(Pa_Initialize()){
-        }
-        ~ScopedPaHandler(){
+	class ScopedPaHandler{
+    	public:
+        	ScopedPaHandler(): _result(Pa_Initialize()){
+        	}
+       		~ScopedPaHandler(){
 		       if (_result == paNoError){
 		           Pa_Terminate();
 		       }
-        }
-        PaError result() const { return _result; }
-    private:
-        PaError _result;
-  };
+        	}
+        	PaError result() const { return _result; }
+    	private:
+        	PaError _result;
+	};
 }//namespace ends
 #endif
