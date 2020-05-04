@@ -48,11 +48,11 @@ namespace line_out_namespace{
 	CLineOut::CLineOut() : stream(0), _result(Pa_Initialize()){
 	}
 
-	~CLineOut(){
+	CLineOut::~CLineOut(){
 		if (_result == paNoError) Pa_Terminate();
 	}
 
-	PaError result() const { return _result; }
+	PaError CLineOut::result() const { return _result; }
 
 	bool CLineOut::defaultSetup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels){
 		iNumberOfChannels= (__iNumberOfChannels);
