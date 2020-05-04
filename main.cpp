@@ -34,14 +34,15 @@
 #include "src/thirdPartyLibs/AudioFile/AudioFile.h"
 
 #define NUM_SECONDS       	(1) 		//For each tone.
-#define FRAMES_PER_BUFFER  	(512)
 const char LOG_FOLDER[20] = "./general.log";
 const char WAV_PATH[120] = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
 AudioFile<double> audioFile;
 int iNumChannels;
-int WAVSampleRate;
-int totalNumSamples;
+int iWAVSampleRate;
+int iTotalNumSamples;
 int iActualFrame=0;
+int iFramesPerBuffer = 512;//default value
+
 #include <stdio.h>
 #include <math.h>
 #include<vector>
@@ -65,12 +66,12 @@ int main(int argc, char* argv[])
 	loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
 	  
 	audioFile.load (WAV_PATH);
-	WAVSampleRate = audioFile.getSampleRate();
+	iWAVSampleRate = audioFile.getSampleRate();
 	iNumChannels = audioFile.getNumChannels();
-	totalNumSamples = audioFile.getNumSamplesPerChannel();
+	iTotalNumSamples = audioFile.getNumSamplesPerChannel();
 		
 	if(iNumChannels > 2) iNumChannels = 2;
-	LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, WAVSampleRate);	  
+	LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);	  
 
     CLineOut TestLine;
 	if(TestLine.result() != paNoError) {
@@ -78,7 +79,12 @@ int main(int argc, char* argv[])
     	exit(1);
     }
     LOG_F(2, "Configurando la salida de audio.");
-    if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, iNumChannels)){
+	do{
+		LOG_F(INFO, "Por favor, introduzca los frames per buffer deseados :\n");
+		cin >> iFramesPerBuffer;
+	}while(iFramesPerBuffer<=0);
+
+    if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels)){
        LOG_F(ERROR,"ERROR : El setup no ha ido bien");
        exit(1);
     }
@@ -86,17 +92,17 @@ int main(int argc, char* argv[])
     if(!TestLine.autoTest()) LOG_F(ERROR,"ERROR : Autotest falló.");
     LOG_F(INFO,"Saliendo del programa.");
 		
-		if(!TestLine.setup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, iNumChannels, *mainCallback)){
+	if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels, *mainCallback)){
        LOG_F(ERROR,"ERROR : El setup no ha ido bien");
        exit(1);
     }
     LOG_F(2,"started wav setup");
     
     TestLine.start();
-		Pa_Sleep( 5 * 1000 );
-	  LOG_F(INFO,"pause for %d seconds",5);
-		TestLine.pause();
-		TestLine.close();
+	LOG_F(INFO,"play for %d seconds",15);
+	Pa_Sleep( 15 * 1000 );
+	TestLine.pause();
+	TestLine.close();
     return 0;
 }
 
@@ -113,11 +119,14 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 	//fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
 	for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
 		for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
-			if(iActualFrame < totalNumSamples){
+			if(iActualFrame < iTotalNumSamples){
 				*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
-				iActualFrame++;
-			}else iActualFrame = 0;
+			}else{
+				iActualFrame = 0;
+				LOG_F(INFO, "Restarting WAV file");
+			} 
 		}
+		iActualFrame++;
 	}
 	return paContinue;
 }//paCallbackMethod ends
