@@ -58,8 +58,8 @@ int main(int argc, char* argv[]);
 
 /*******************************************************************/
 
-
-int main(int argc, char* argv[]){
+int main(int argc, char* argv[])
+{
 	loguru::init(argc,argv);
 	// Put every log message in "everything.log":
 	loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
@@ -71,13 +71,12 @@ int main(int argc, char* argv[]){
 		
 	if(iNumChannels > 2) iNumChannels = 2;
 	LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, WAVSampleRate);	  
-	  
-    ScopedPaHandler paInit;
-    if(paInit.result() != paNoError) {
+
+    CLineOut TestLine;
+	if(TestLine.result() != paNoError) {
     	LOG_F(ERROR,"ERROR : No se ha podido iniciar portaudio");
     	exit(1);
     }
-    CLineOut TestLine;
     LOG_F(2, "Configurando la salida de audio.");
     if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), FRAMES_PER_BUFFER, WAVSampleRate, iNumChannels)){
        LOG_F(ERROR,"ERROR : El setup no ha ido bien");
@@ -101,11 +100,10 @@ int main(int argc, char* argv[]){
     return 0;
 }
 
-
-
 int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 				unsigned long __framesPerBuffer, const PaStreamCallbackTimeInfo* __timeInfo,
-				PaStreamCallbackFlags __statusFlags){
+				PaStreamCallbackFlags __statusFlags)
+{
 	float * fpOut = (float*)__outputBuffer;
 	(void) __timeInfo; /* Prevent unused variable warnings. */
 	(void) __statusFlags;
@@ -114,12 +112,12 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 	//THERE IS A __framesPerBuffer PER CHANNEL!!!
 	//fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
 	for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-			for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
-				if(iActualFrame < totalNumSamples){
-					*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
-					iActualFrame++;
-				}else iActualFrame = 0;
-			}
+		for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
+			if(iActualFrame < totalNumSamples){
+				*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
+				iActualFrame++;
+			}else iActualFrame = 0;
+		}
 	}
 	return paContinue;
 }//paCallbackMethod ends

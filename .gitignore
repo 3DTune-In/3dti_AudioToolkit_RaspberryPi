@@ -4,3 +4,7 @@ YOUR_BINARY*
 ./src/lineOut/libportaudio.h
 ./*.log
 *.o
+
+general.log
+
+PortableAudiospatialization
