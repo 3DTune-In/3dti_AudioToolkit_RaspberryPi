@@ -54,7 +54,9 @@ namespace line_out_namespace{
 
 	PaError CLineOut::result() const { return _result; }
 
-	bool CLineOut::defaultSetup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels){
+	bool CLineOut::defaultSetup(PaDeviceIndex __index, int __iBufferSize, int 
+				__iSampleRate, int __iNumberOfChannels)
+	{
 		iNumberOfChannels= (__iNumberOfChannels);
 		iSampleRate = (__iSampleRate);
 		iBufferSize = (__iBufferSize);
@@ -79,15 +81,15 @@ namespace line_out_namespace{
 		outputParameters.hostApiSpecificStreamInfo = NULL;
 		//Port Audio configure stream function
 		PaError err = Pa_OpenStream(
-							&stream,
-							NULL, 				// no input
-							&outputParameters,
-							__iSampleRate,
-							__iBufferSize,
-							paClipOff,      	//we won't output out of range samples so don't bother clipping them 
-							&CLineOut::paCallback,
-							this           		//Using 'this' for userData so we can cast to lineOut* in paCallback method 
-							);
+						&stream
+						,NULL			// no input
+						,&outputParameters
+						,__iSampleRate
+						,__iBufferSize
+						,paClipOff     	//we won't output out of range samples so don't bother clipping them 
+						,&CLineOut::paCallback
+						,this           		//Using 'this' for userData so we can cast to lineOut* in paCallback method 
+						);
 		
 		if (err != paNoError){
 		 LOG_F(ERROR, "Failed opening the stream device");
@@ -135,14 +137,14 @@ namespace line_out_namespace{
 		outputParameters.hostApiSpecificStreamInfo = NULL;
 		//Port Audio configure stream function
 		PaError err = Pa_OpenStream(
-						&stream,
-						NULL, 			// no input 
-						&outputParameters,
-						__iSampleRate,
-						__iBufferSize,
-						paClipOff,      // we won't output out of range samples so don't bother clipping them
-						__paCallback,
-						this            // Using 'this' for userData so we can cast to lineOut* in paCallback method 
+						&stream
+						,NULL					// no input 
+						,&outputParameters
+						,__iSampleRate
+						,__iBufferSize
+						,paClipOff    // we won't output out of range samples so don't bother clipping them
+						,__paCallback
+						,this         // Using 'this' for userData so we can cast to lineOut* in paCallback method 
 						);
 
 		if (err != paNoError){
@@ -198,7 +200,8 @@ namespace line_out_namespace{
 			}//for ends
 		}//for ends
 		LOG_F(2,"data created");
-		LOG_F(INFO,"playing %d Hz for %d seconds...",DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
+		LOG_F(INFO,"playing %d Hz for %d seconds..."
+				,DEFAULT_TONE_FRECUENCY,NUM_SECONDS);
 		CLineOut::start();
 		Pa_Sleep( NUM_SECONDS * 1000 );
 		LOG_F(INFO,"pause for %d seconds",NUM_SECONDS);

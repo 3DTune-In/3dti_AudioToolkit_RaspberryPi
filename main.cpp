@@ -42,7 +42,7 @@ int iWAVSampleRate;
 int iTotalNumSamples;
 int iActualFrame=0;
 int iFramesPerBuffer = 512;//default value
-
+bool bLoopMode = false;
 #include <stdio.h>
 #include <math.h>
 #include<vector>
@@ -72,43 +72,52 @@ int main(int argc, char* argv[])
 		
 	if(iNumChannels > 2) iNumChannels = 2;
 	LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);	  
-
-    CLineOut TestLine;
+	CLineOut TestLine;
 	if(TestLine.result() != paNoError) {
-    	LOG_F(ERROR,"ERROR : No se ha podido iniciar portaudio");
-    	exit(1);
-    }
-    LOG_F(2, "Configurando la salida de audio.");
+		LOG_F(ERROR,"ERROR : No se ha podido iniciar portaudio");
+		exit(1);
+	}
+	LOG_F(2, "Configurando la salida de audio.");
 	do{
 		LOG_F(INFO, "Por favor, introduzca los frames per buffer deseados :\n");
 		cin >> iFramesPerBuffer;
 	}while(iFramesPerBuffer<=0);
+	cin.ignore();
 
-    if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels)){
-       LOG_F(ERROR,"ERROR : El setup no ha ido bien");
-       exit(1);
-    }
-    LOG_F(2,"Empezando el autotest.");
-    if(!TestLine.autoTest()) LOG_F(ERROR,"ERROR : Autotest falló.");
-    LOG_F(INFO,"Saliendo del programa.");
+	char inputChar;
+	do{
+		LOG_F(INFO, "Quiere habilitar el modo loop?(y/n) :\n");
+		cin >> inputChar;
+	}while(inputChar != 'y' && inputChar !='n');
+	cin.ignore();
+	if(inputChar=='y') bLoopMode=true;
+	else bLoopMode=false;
+
+	if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels)){
+		LOG_F(ERROR,"ERROR : El setup no ha ido bien");
+		exit(1);
+	}
+	LOG_F(2,"Empezando el autotest.");
+	if(!TestLine.autoTest()) LOG_F(ERROR,"ERROR : Autotest falló.");
+	LOG_F(INFO,"Saliendo del programa.");
 		
 	if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels, *mainCallback)){
-       LOG_F(ERROR,"ERROR : El setup no ha ido bien");
-       exit(1);
-    }
-    LOG_F(2,"started wav setup");
+		LOG_F(ERROR,"ERROR : El setup no ha ido bien");
+		exit(1);
+  }
+  LOG_F(2,"started wav setup");
     
-    TestLine.start();
+  TestLine.start();
 	LOG_F(INFO,"play for %d seconds",15);
 	Pa_Sleep( 15 * 1000 );
 	TestLine.pause();
 	TestLine.close();
-    return 0;
+  return 0;
 }
 
 int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
-				unsigned long __framesPerBuffer, const PaStreamCallbackTimeInfo* __timeInfo,
-				PaStreamCallbackFlags __statusFlags)
+			unsigned long __framesPerBuffer, const PaStreamCallbackTimeInfo* __timeInfo,
+			PaStreamCallbackFlags __statusFlags)
 {
 	float * fpOut = (float*)__outputBuffer;
 	(void) __timeInfo; /* Prevent unused variable warnings. */
@@ -122,21 +131,26 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 			if(iActualFrame < iTotalNumSamples){
 				*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
 			}else{
-				iActualFrame = 0;
-				LOG_F(INFO, "Restarting WAV file");
+				if(bLoopMode){
+					iActualFrame = 0;
+				  LOG_F(INFO, "Restarting WAV file");
+					*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
+				}else{
+					*fpOut++=0;
+				}	
 			} 
-		}
-		iActualFrame++;
-	}
+		}//for ends iActualChannel
+		if(iActualFrame < iTotalNumSamples) iActualFrame++;
+	}//for ends frames per buffer
 	return paContinue;
 }//paCallbackMethod ends
 
 static int mainCallback( const void *inputBuffer, void *outputBuffer,
-						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
-						PaStreamCallbackFlags statusFlags,void *userData )
+				unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
+				PaStreamCallbackFlags statusFlags,void *userData )
 {
 	/* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
 	we called Pa_OpenStream with 'this' for userData */
 	return mainCallbackMethod(inputBuffer, outputBuffer,
-							framesPerBuffer,timeInfo,statusFlags);
+					framesPerBuffer,timeInfo,statusFlags);
 }//paCallback ends

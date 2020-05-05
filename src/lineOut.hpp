@@ -44,15 +44,25 @@ namespace line_out_namespace{
 			CLineOut();
 			~CLineOut();
 			PaError result() const;
+			bool defaultSetup(PaDeviceIndex __index
+				,int __iBufferSize
+				,int __iSampleRate 
+				,int __iNumberOfChannels);
+			bool setup(PaDeviceIndex __index
+				,int __iBufferSize
+				,int __iSampleRate
+				,int __iNumberOfChannels 
+				,int (*__paCallback)( const void *
+					, void *
+					,unsigned long 
+					,const PaStreamCallbackTimeInfo*
+					,PaStreamCallbackFlags ,void * ));
 
-      		bool defaultSetup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels);
-      		bool setup(PaDeviceIndex __index, int __iBufferSize, int __iSampleRate, int __iNumberOfChannels 
-					,int (*__paCallback)( const void *, void *,unsigned long ,const PaStreamCallbackTimeInfo*,
-					PaStreamCallbackFlags ,void * ));
-	   		bool close();
-	  		bool start();
+			bool close();
+			bool start();
 	 		bool pause();
-			//play a #A5 880Hz for one second, pause one second and then, play a #A4 440Hz for another second.
+			// play a #A5 880Hz for one second, pause one second, 
+			// then play a #A4 440Hz for another second.
 			bool autoTest();	//Close the stream at finish;
 			
 			int getSampleRate();
@@ -76,7 +86,8 @@ namespace line_out_namespace{
 			vector <float> vfData;
 			vector <float> vfRightData;
 			PaError _result;
-			//This callback is called when the system need to, the stram is opened and started.
+			// This callback is called when the system need to, 
+			// the stream is opened and started.
 			int paCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 					unsigned long __framesPerBuffer,
 					const PaStreamCallbackTimeInfo* __timeInfo,
@@ -90,12 +101,13 @@ namespace line_out_namespace{
 				//THERE IS A __framesPerBuffer PER CHANNEL!!!
 				//fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
 				for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-					for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++){
+					for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++)
+					{
 						*fpOut++=(*vpfDataPointer)[iActualFrame]; 
 						iActualFrame++;
-					}
+					}//for ends
 					if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=(iSampleRate*iNumberOfChannels);
-				}
+				}//for ends
 				return paContinue;
 			}//paCallbackMethod ends
 
@@ -103,13 +115,18 @@ namespace line_out_namespace{
 			** It may called at interrupt level on some machines so don't do anything
 			** that could mess up the system like calling malloc() or free().
 			*/
-			static int paCallback( const void *inputBuffer, void *outputBuffer,
-						unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
-						PaStreamCallbackFlags statusFlags, void *userData ){
+			static int paCallback( const void *inputBuffer
+							,void *outputBuffer
+							,unsigned long framesPerBuffer
+							,const PaStreamCallbackTimeInfo* timeInfo
+							,PaStreamCallbackFlags statusFlags
+							,void *userData )
+			{
 				/* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, 
 				we can do that since we called Pa_OpenStream with 'this' for userData */
-				return ((CLineOut*)userData)->paCallbackMethod(inputBuffer, outputBuffer,
-												framesPerBuffer,timeInfo,statusFlags);
+				return ((CLineOut*)userData)->paCallbackMethod(inputBuffer
+												,outputBuffer,framesPerBuffer
+												,timeInfo,statusFlags);
 			}//paCallback ends
 
 			// This routine is called by portlineOut when playback is done.	
