@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
 	loguru::init(argc,argv);
 	// Put every log message in "everything.log":
 	loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
-	  
+
 	audioFile.load (WAV_PATH);
 	iWAVSampleRate = audioFile.getSampleRate();
 	iNumChannels = audioFile.getNumChannels();
@@ -104,15 +104,15 @@ int main(int argc, char* argv[])
 	if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels, *mainCallback)){
 		LOG_F(ERROR,"ERROR : El setup no ha ido bien");
 		exit(1);
-  }
-  LOG_F(2,"started wav setup");
+	}
+	LOG_F(2,"started wav setup");
     
-  TestLine.start();
+	TestLine.start();
 	LOG_F(INFO,"play for %d seconds",15);
 	Pa_Sleep( 15 * 1000 );
 	TestLine.pause();
 	TestLine.close();
-  return 0;
+	return 0;
 }
 
 int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
@@ -133,7 +133,7 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
 			}else{
 				if(bLoopMode){
 					iActualFrame = 0;
-				  LOG_F(INFO, "Restarting WAV file");
+					LOG_F(INFO, "Restarting WAV file");
 					*fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
 				}else{
 					*fpOut++=0;

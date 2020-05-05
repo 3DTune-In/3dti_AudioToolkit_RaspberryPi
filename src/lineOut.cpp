@@ -28,7 +28,7 @@
 /*! \file */
 
 #ifndef NUMBER_PI
-#define NUMBER_PI  (3.14159265)
+#define NUMBER_PI (3.14159265)
 #endif
 #include<vector> // for array, at()
 #include<tuple> // for get()
@@ -70,12 +70,12 @@ namespace line_out_namespace{
 		PaStreamParameters outputParameters;
 		outputParameters.device = __index;
 		if (outputParameters.device == paNoDevice){
-		 LOG_F(ERROR,"ERROR : Device not found");
-		 return false;		//device not found
+			LOG_F(ERROR,"ERROR : Device not found");
+			return false;		//device not found
 		}
 		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
 		if (pInfo != 0) LOG_F(INFO,"Output device name: '%s'", pInfo->name);
-		outputParameters.channelCount = __iNumberOfChannels;        // stereo output 
+		outputParameters.channelCount = __iNumberOfChannels;		// stereo output 
 		outputParameters.sampleFormat = paFloat32; 					// 32 bit floating point output 
 		outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
 		outputParameters.hostApiSpecificStreamInfo = NULL;
@@ -86,9 +86,9 @@ namespace line_out_namespace{
 						,&outputParameters
 						,__iSampleRate
 						,__iBufferSize
-						,paClipOff     	//we won't output out of range samples so don't bother clipping them 
+						,paClipOff		//we won't output out of range samples so don't bother clipping them 
 						,&CLineOut::paCallback
-						,this           		//Using 'this' for userData so we can cast to lineOut* in paCallback method 
+						,this			//Using 'this' for userData so we can cast to lineOut* in paCallback method 
 						);
 		
 		if (err != paNoError){
@@ -98,9 +98,9 @@ namespace line_out_namespace{
 		err = Pa_SetStreamFinishedCallback( CLineOut::stream, &CLineOut::paStreamFinished );
 		if (err != paNoError)
 		{
-			  Pa_CloseStream( CLineOut::stream );
-			  CLineOut::stream = 0;
-	  		return false;
+				Pa_CloseStream( CLineOut::stream );
+				CLineOut::stream = 0;
+				return false;
 		}
 		return true;
 	}//defaultSetup ends
@@ -125,38 +125,38 @@ namespace line_out_namespace{
 		outputParameters.device = __index;
 		if (outputParameters.device == paNoDevice)
 		{
-		 LOG_F(ERROR,"ERROR : Device not found");
-		 return false;		//device not found
+			LOG_F(ERROR,"ERROR : Device not found");
+			return false;		//device not found
 		}
 		const PaDeviceInfo* pInfo = Pa_GetDeviceInfo(__index);
 		if (pInfo != 0) LOG_F(INFO,"Output device name: '%s'", pInfo->name);
 
-		outputParameters.channelCount = __iNumberOfChannels;        // stereo output 
+		outputParameters.channelCount = __iNumberOfChannels;	// stereo output 
 		outputParameters.sampleFormat = paFloat32; 					// 32 bit floating point output
 		outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
 		outputParameters.hostApiSpecificStreamInfo = NULL;
 		//Port Audio configure stream function
 		PaError err = Pa_OpenStream(
 						&stream
-						,NULL					// no input 
+						,NULL			// no input 
 						,&outputParameters
 						,__iSampleRate
 						,__iBufferSize
-						,paClipOff    // we won't output out of range samples so don't bother clipping them
+						,paClipOff			// we won't output out of range samples so don't bother clipping them
 						,__paCallback
-						,this         // Using 'this' for userData so we can cast to lineOut* in paCallback method 
+						,this			// Using 'this' for userData so we can cast to lineOut* in paCallback method 
 						);
 
 		if (err != paNoError){
-		 LOG_F(ERROR, "Failed opening the stream device");
-		 return false;					// Failed to open stream to device !!! 
+			LOG_F(ERROR, "Failed opening the stream device");
+			return false;					// Failed to open stream to device !!! 
 		}
 		err = Pa_SetStreamFinishedCallback( CLineOut::stream, &CLineOut::paStreamFinished );
 		if (err != paNoError)
 		{
-			  Pa_CloseStream( CLineOut::stream );
-			  CLineOut::stream = 0;
-	  		return false;
+				Pa_CloseStream( CLineOut::stream );
+				CLineOut::stream = 0;
+				return false;
 		}
 		return true;
 	}//Setup() ends
@@ -164,26 +164,26 @@ namespace line_out_namespace{
 	//Close the lineOut device of this lineOut variable.
 	bool CLineOut::close()
 	{
-	    if (CLineOut::stream == 0) return false;
-	    PaError err = Pa_CloseStream( CLineOut::stream );
-	    CLineOut::stream = 0;
-	    return (err == paNoError);
+			if (CLineOut::stream == 0) return false;
+			PaError err = Pa_CloseStream( CLineOut::stream );
+			CLineOut::stream = 0;
+			return (err == paNoError);
 	}//close() ends
 
 	//Start the lineOut streaming.
 	bool CLineOut::start()
 	{
-	    if (CLineOut::stream == 0) return false;
-	    PaError err = Pa_StartStream( CLineOut::stream );
-	    return (err == paNoError);
+			if (CLineOut::stream == 0) return false;
+			PaError err = Pa_StartStream( CLineOut::stream );
+			return (err == paNoError);
 	}//start() ends
 
 	//pause the lineOut streaming.
 	bool CLineOut::pause()
 	{
-	    if (CLineOut::stream == 0) return false;
-	    PaError err = Pa_StopStream( CLineOut::stream );
-	    return (err == paNoError);
+			if (CLineOut::stream == 0) return false;
+			PaError err = Pa_StopStream( CLineOut::stream );
+			return (err == paNoError);
 	}//pause() ends
 
 	bool CLineOut::autoTest(){
