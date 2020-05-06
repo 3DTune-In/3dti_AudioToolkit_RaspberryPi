@@ -42,7 +42,8 @@ int iWAVSampleRate;
 int iTotalNumSamples;
 int iActualFrame=0;
 int iFramesPerBuffer = 512;//default value
-bool bLoopMode = false;
+bool bLoopMode = false;//default value
+
 #include <stdio.h>
 #include <math.h>
 #include<vector>
@@ -92,8 +93,16 @@ int main(int argc, char* argv[])
 	cin.ignore();
 	if(inputChar=='y') bLoopMode=true;
 	else bLoopMode=false;
-
-	if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels)){
+	int inputSampleRate;
+	const PaDeviceInfo *deviceInfo;
+	deviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
+	do{
+		LOG_F(INFO, "Introduzca el SampleRate del dispositivo %s", deviceInfo->name);
+		LOG_F(INFO, "el valor por defecto es: %d",deviceInfo->defaultSampleRate);
+		cin >> inputSampleRate;
+	}while(inputSampleRate<=0);
+	if(iWAVSampleRate != inputSampleRate) LOG_F(WARNING, "Different sample rate between wav file and default device");
+	if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, inputSampleRate, iNumChannels)){
 		LOG_F(ERROR,"ERROR : El setup no ha ido bien");
 		exit(1);
 	}
@@ -101,7 +110,7 @@ int main(int argc, char* argv[])
 	if(!TestLine.autoTest()) LOG_F(ERROR,"ERROR : Autotest falló.");
 	LOG_F(INFO,"Saliendo del programa.");
 		
-	if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, iWAVSampleRate, iNumChannels, *mainCallback)){
+	if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, inputSampleRate, iNumChannels, *mainCallback)){
 		LOG_F(ERROR,"ERROR : El setup no ha ido bien");
 		exit(1);
 	}
