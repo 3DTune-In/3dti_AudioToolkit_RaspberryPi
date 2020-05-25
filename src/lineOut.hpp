@@ -1,9 +1,9 @@
 /**
-* \start date	december 2019
+* \start date  december 2019
 * \class line_out
 *
 * \brief Declaration of class line_out
-* \date	April 2020
+* \date  April 2020
 *
 * \authors: Gonzalo Alfonso Bueno Santana
 * \b Contact : gonzupi6@gmail.com
@@ -38,109 +38,108 @@
 using namespace std;
 
 namespace line_out_namespace{
-	class CLineOut
-		{
-		public:
-			CLineOut();
-			~CLineOut();
-			PaError result() const;
-			bool defaultSetup(PaDeviceIndex __index
-				,int __iBufferSize
-				,int __iSampleRate 
-				,int __iNumberOfChannels);
-			bool setup(PaDeviceIndex __index
-				,int __iBufferSize
-				,int __iSampleRate
-				,int __iNumberOfChannels 
-				,int (*__paCallback)( const void *
-					, void *
-					,unsigned long 
-					,const PaStreamCallbackTimeInfo*
-					,PaStreamCallbackFlags ,void * ));
+  class CLineOut
+    {
+    public:
+      CLineOut();
+      ~CLineOut();
+      PaError result() const;
+      //Configure the setup for the autotest config using default callback
+      bool defaultSetup(PaDeviceIndex __index
+        ,int __iBufferSize
+        ,int __iSampleRate 
+        ,int __iNumberOfChannels);
+      bool setup(PaDeviceIndex __index
+        ,int __iBufferSize
+        ,int __iSampleRate
+        ,int __iNumberOfChannels 
+        ,int (*__paCallback)( const void *
+          , void *
+          ,unsigned long 
+          ,const PaStreamCallbackTimeInfo*
+          ,PaStreamCallbackFlags ,void * ));
 
-			bool close();
-			bool start();
-	 		bool pause();
-			// play a #A5 880Hz for one second, pause one second, 
-			// then play a #A4 440Hz for another second.
-			bool autoTest();	//Close the stream at finish;
-			
-			int getSampleRate();
-			int getBufferSize();
-			void getBufferDataAdress(vector <float> * * __data);
-			void setBufferDataAdress(vector <float> * __data);
-		//public ends
+      bool close();
+      bool start();
+       bool pause();
+      // play a #A5 880Hz for one second, pause one second, 
+      // then play a #A4 440Hz for another second.
+      bool autoTest();  //Close the stream at finish;
+      
+      int getSampleRate();
+      int getBufferSize();
+      void getBufferDataAdress(vector <float> * * __data);
+      void setBufferDataAdress(vector <float> * __data);
+    //public ends
+    /////////////////////////////////////////////////////////////////
+    
+    private:
+      //Global variables for the class.
+      unsigned int iSampleRate;
+      unsigned int iBufferSize;
+      int iNumberOfChannels;
+      unsigned int iActualFrame = 0;
+      char caMessage[20] = "Sound stop";
+      PaStream *stream;
+      vector <float> *vpfDataPointer;
+      vector <float> vfData;
+      PaError _result;
+      // This callback is called when the system need to, 
+      // the stream is opened and started.
+      int paCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
+          unsigned long __framesPerBuffer,
+          const PaStreamCallbackTimeInfo* __timeInfo,
+          PaStreamCallbackFlags __statusFlags)
+      {
+        float * fpOut = (float*)__outputBuffer;
+        (void) __timeInfo;     // Prevent unused variable warnings.
+        (void) __statusFlags;
+        (void) __inputBuffer;
+        int iActualChannel;
+        //THERE IS A __framesPerBuffer PER CHANNEL!!!
+        //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
+        for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
+          for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++)
+          {
+            *fpOut++=(*vpfDataPointer)[iActualFrame]; 
+            iActualFrame++;
+          }//for ends
+          if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=(iSampleRate*iNumberOfChannels);
+        }//for ends
+        return paContinue;
+      }//paCallbackMethod ends
 
-		/*******************************************************************************************/
+      /* This routine will be called by the PortlineOut engine when CLineOut is needed.
+      ** It may called at interrupt level on some machines so don't do anything
+      ** that could mess up the system like calling malloc() or free().
+      */
+      static int paCallback( const void *inputBuffer
+              ,void *outputBuffer
+              ,unsigned long framesPerBuffer
+              ,const PaStreamCallbackTimeInfo* timeInfo
+              ,PaStreamCallbackFlags statusFlags
+              ,void *userData )
+      {
+        /* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, 
+        we can do that since we called Pa_OpenStream with 'this' for userData */
+        return ((CLineOut*)userData)->paCallbackMethod(inputBuffer
+                        ,outputBuffer,framesPerBuffer
+                        ,timeInfo,statusFlags);
+      }//paCallback ends
 
-		private:
-			//Global variables for the class.
-			unsigned int iSampleRate;
-			unsigned int iBufferSize;
-			int iNumberOfChannels;
-			unsigned int iActualFrame = 0;
-			char caMessage[20] = "Sound stop";
-			PaStream *stream;
-			vector <float> *vpfDataPointer;
-			vector <float> *vpfLineOutRightData;
-			vector <float> vfData;
-			vector <float> vfRightData;
-			PaError _result;
-			// This callback is called when the system need to, 
-			// the stream is opened and started.
-			int paCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
-					unsigned long __framesPerBuffer,
-					const PaStreamCallbackTimeInfo* __timeInfo,
-					PaStreamCallbackFlags __statusFlags)
-			{
-				float * fpOut = (float*)__outputBuffer;
-				(void) __timeInfo; 		// Prevent unused variable warnings.
-				(void) __statusFlags;
-				(void) __inputBuffer;
-				int iActualChannel;
-				//THERE IS A __framesPerBuffer PER CHANNEL!!!
-				//fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
-				for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-					for(iActualChannel = 0; iActualChannel<iNumberOfChannels; iActualChannel++)
-					{
-						*fpOut++=(*vpfDataPointer)[iActualFrame]; 
-						iActualFrame++;
-					}//for ends
-					if(iActualFrame >= iSampleRate*iNumberOfChannels) iActualFrame-=(iSampleRate*iNumberOfChannels);
-				}//for ends
-				return paContinue;
-			}//paCallbackMethod ends
-
-			/* This routine will be called by the PortlineOut engine when CLineOut is needed.
-			** It may called at interrupt level on some machines so don't do anything
-			** that could mess up the system like calling malloc() or free().
-			*/
-			static int paCallback( const void *inputBuffer
-							,void *outputBuffer
-							,unsigned long framesPerBuffer
-							,const PaStreamCallbackTimeInfo* timeInfo
-							,PaStreamCallbackFlags statusFlags
-							,void *userData )
-			{
-				/* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, 
-				we can do that since we called Pa_OpenStream with 'this' for userData */
-				return ((CLineOut*)userData)->paCallbackMethod(inputBuffer
-												,outputBuffer,framesPerBuffer
-												,timeInfo,statusFlags);
-			}//paCallback ends
-
-			// This routine is called by portlineOut when playback is done.	
-			void paStreamFinishedMethod()
-			{
-					LOG_F( INFO,"Stream Completed: %s", caMessage );
-			}
-			
-			// This routine is called by portlineOut when playback is done.
-			static void paStreamFinished(void* userData)
-			{
-					return ((CLineOut*)userData)->paStreamFinishedMethod();
-			}
-		//private ends
-	};//CLineOut ends
+      // This routine is called by portlineOut when playback is done.  
+      void paStreamFinishedMethod()
+      {
+          LOG_F( INFO,"Stream Completed: %s", caMessage );
+      }
+      
+      // This routine is called by portlineOut when playback is done.
+      static void paStreamFinished(void* userData)
+      {
+          return ((CLineOut*)userData)->paStreamFinishedMethod();
+      }
+    //private ends
+    /////////////////////////////////////////////////////////////////
+  };//CLineOut ends
 }//namespace ends
 #endif
