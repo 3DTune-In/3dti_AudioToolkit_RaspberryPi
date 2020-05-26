@@ -28,27 +28,25 @@
 /*! \file */
 
 
-#include<vector> // for array, at()
-#include "lineOut.hpp"
+#include <vector> // for array, at()
 #include <iostream>
 #include <string>
 #include <mutex>
 #include "./thirdPartyLibs/AudioFile/AudioFile.h"
 #include "./soundFile.hpp"
+#include "./soundSource.hpp"
 
 using namespace std;
 
-#define DEFAULT_TONE_FRECUENCY 880
-#define NUM_SECONDS 1
-
 namespace sound_file_namespace{
   CSoundFile::CSoundFile(){}
+  
   bool CSoundFile::setup(string __sFilePath, vector<float>  __vfChannelWeight, bool __bLoopMode){
     bPlay= true;
     iActualSample=0;
     audioFile.load (__sFilePath);
     sFilePath = __sFilePath;
-    iSampleRateInFile = audioFile.getSampleRate();
+    iSampleRate = audioFile.getSampleRate();
     iNumChannelsInFile = audioFile.getNumChannels();
     iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
     vfChannelWeight = __vfChannelWeight;
@@ -60,7 +58,7 @@ namespace sound_file_namespace{
     iActualSample=0;
     audioFile.load (__sFilePath);
     sFilePath = __sFilePath;
-    iSampleRateInFile = audioFile.getSampleRate();
+    iSampleRate = audioFile.getSampleRate();
     iNumChannelsInFile = audioFile.getNumChannels();
     iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
     vfChannelWeight = __vfChannelWeight;
@@ -72,7 +70,7 @@ namespace sound_file_namespace{
     iActualSample=0;
     audioFile.load (__sFilePath);
     sFilePath = __sFilePath;
-    iSampleRateInFile = audioFile.getSampleRate();
+    iSampleRate = audioFile.getSampleRate();
     iNumChannelsInFile = audioFile.getNumChannels();
     iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
     for(int iActualChannel=0; iActualChannel<iNumChannelsInFile; iActualChannel++){
@@ -96,9 +94,9 @@ namespace sound_file_namespace{
   }
 
   bool CSoundFile::setActualTime(float __fTime){
-    if(__fTime*iSampleRateInFile<iNumSamplesPerchannelInFile){
+    if(__fTime*iSampleRate<iNumSamplesPerchannelInFile){
       mtx_getFrame.lock();//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
-      iActualSample=__fTime*iSampleRateInFile;
+      iActualSample=__fTime*iSampleRate;
       mtx_getFrame.unlock();
       return true;
     }else{
@@ -122,7 +120,7 @@ namespace sound_file_namespace{
   }
 
   float CSoundFile::getTimeFileLenght(){
-    return iNumSamplesPerchannelInFile*iSampleRateInFile;
+    return iNumSamplesPerchannelInFile*iSampleRate;
   }
 
   int CSoundFile::getActualSampleNumber(){
@@ -160,15 +158,6 @@ namespace sound_file_namespace{
     }
   }//getFrame ends
 
-  int CSoundFile::getSampleRate(){
-    return iSampleRateInFile;
-  }
-  bool CSoundFile::play(){
-    bPlay = true;
-  }
-  bool CSoundFile::pause(){
-    bPlay = false;
-  }
   bool CSoundFile::stop(){
     bPlay = false;
     iActualSample=0;

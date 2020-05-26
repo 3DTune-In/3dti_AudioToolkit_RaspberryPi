@@ -29,7 +29,7 @@
 
 #include <stdio.h>
 #include <math.h>
-#include<vector>
+#include <vector>
 #include <iostream>
 #include <string>
 
@@ -37,9 +37,11 @@
 #include "./src/portaudio.h"
 #include "./src/lineOut.hpp"
 #include "./src/soundFile.hpp"
+#include "./src/soundSource.hpp"
 
 using namespace line_out_namespace;
 using namespace sound_file_namespace;
+using namespace sound_source_namespace;
 
 #define NUM_SECONDS    (1)     //For each tone.
 const char LOG_FOLDER[20] = "./general.log";
@@ -51,7 +53,6 @@ int iActualFrame=0;
 int iFramesPerBuffer = 512;//default value
 bool bLoopMode = false;//default value
 CSoundFile audioFile;
-
 
 
 /*******************************************************************/

@@ -29,16 +29,18 @@
 
 #ifndef SOUND_FILE_H
 #define SOUND_FILE_H
-#endif
+
 #include <string>
-#include<vector> // for array, at()
+#include <vector> // for array, at()
 #include <iostream>
 #include <mutex>
+#include "./soundSource.cpp"
 #include "./thirdPartyLibs/AudioFile/AudioFile.h"
-using namespace std;
+
+using namespace sound_source_namespace;
 
 namespace sound_file_namespace{
-  class CSoundFile
+  class CSoundFile: protected CSoundSource
     {
       public:
         //Setup the stream file, by default, loop mode is enabled and just select channel 0
@@ -56,25 +58,25 @@ namespace sound_file_namespace{
         float getTimeFileLenght();
         int   getActualSampleNumber();
         int   getNumChannels();
+        bool  stop();
+
         //VIRTUALES Y HEREDADOS
         float getFrame();
-        int   getSampleRate();
-        bool  play();
-        bool  pause();
-        bool  stop();
+        //int   getSampleRate();
+        //bool  play();
+        //bool  pause();
 
       //Public ends
       //////////////////////////////////////////////////////////////////
       private:
-        bool bPlay;
-        AudioFile<double> audioFile;
-        int iNumChannelsInFile;
-        int iNumSamplesPerchannelInFile;
-        int iSampleRateInFile;
-        int iActualSample;
-        string sFilePath;
-        vector<float> vfChannelWeight;
         bool bLoopMode;
+        int  iNumChannelsInFile;
+        int  iNumSamplesPerchannelInFile;
+        int  iActualSample;
+        string sFilePath;
+        AudioFile<double> audioFile;
+        vector<float> vfChannelWeight;
         mutex mtx_getFrame;//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
     };//class ends
 }//namespace ends
+#endif
