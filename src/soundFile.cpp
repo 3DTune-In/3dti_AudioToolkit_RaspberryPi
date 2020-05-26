@@ -125,7 +125,7 @@ namespace sound_file_namespace{
     return iNumSamplesPerchannelInFile*iSampleRateInFile;
   }
 
-  int CSoundFile::getActuaalSampleNumber(){
+  int CSoundFile::getActualSampleNumber(){
     return iActualSample;
   }
 
@@ -172,5 +172,9 @@ namespace sound_file_namespace{
   bool CSoundFile::stop(){
     bPlay = false;
     iActualSample=0;
+  }
+
+  int CSoundFile::getNumChannels(){
+    return iNumChannelsInFile;
   }
 }//namespace ends

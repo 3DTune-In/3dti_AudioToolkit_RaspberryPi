@@ -27,28 +27,32 @@
 
 /*! \file */
 
+#include <stdio.h>
+#include <math.h>
+#include<vector>
+#include <iostream>
+#include <string>
 
-#include "./thirdPartyLibs/loguru/loguru.cpp"
+#include "./src/thirdPartyLibs/loguru/loguru.cpp"
 #include "./src/portaudio.h"
 #include "./src/lineOut.hpp"
+#include "./src/soundFile.hpp"
+
+using namespace line_out_namespace;
+using namespace sound_file_namespace;
 
 #define NUM_SECONDS    (1)     //For each tone.
 const char LOG_FOLDER[20] = "./general.log";
-const char WAV_PATH[120] = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
-AudioFile<double> audioFile;
+string WAV_PATH = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
 int iNumChannels;
 int iWAVSampleRate;
 int iTotalNumSamples;
 int iActualFrame=0;
 int iFramesPerBuffer = 512;//default value
 bool bLoopMode = false;//default value
+CSoundFile audioFile;
 
-#include <stdio.h>
-#include <math.h>
-#include<vector>
-#include <iostream>
 
-using namespace line_out_namespace;
 
 /*******************************************************************/
 static int mainCallback( const void *inputBuffer, void *outputBuffer,
@@ -64,11 +68,11 @@ int main(int argc, char* argv[])
   loguru::init(argc,argv);
   // Put every log message in "everything.log":
   loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
-
-  audioFile.load (WAV_PATH);
+  
+  audioFile.setup (WAV_PATH);
   iWAVSampleRate = audioFile.getSampleRate();
   iNumChannels = audioFile.getNumChannels();
-  iTotalNumSamples = audioFile.getNumSamplesPerChannel();
+  iTotalNumSamples = audioFile.getFileLength();
 
   if(iNumChannels > 2) iNumChannels = 2;
   LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);    
@@ -83,7 +87,6 @@ int main(int argc, char* argv[])
     cin >> iFramesPerBuffer;
   }while(iFramesPerBuffer<=0);
   cin.ignore();
-
   char inputChar;
   do{
     LOG_F(INFO, "Quiere habilitar el modo loop?(y/n) :\n");
@@ -92,16 +95,17 @@ int main(int argc, char* argv[])
   cin.ignore();
   if(inputChar=='y') bLoopMode=true;
   else bLoopMode=false;
-  int inputSampleRate;
+  audioFile.setLoop(bLoopMode);
+  int outputSampleRate;
   const PaDeviceInfo *deviceInfo;
   deviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
   do{
     LOG_F(INFO, "Introduzca el SampleRate del dispositivo %s", deviceInfo->name);
     LOG_F(INFO, "el valor por defecto es: %d",deviceInfo->defaultSampleRate);
-    cin >> inputSampleRate;
-  }while(inputSampleRate<=0);
-  if(iWAVSampleRate != inputSampleRate) LOG_F(WARNING, "Different sample rate between wav file and default device");
-  if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, inputSampleRate, iNumChannels)){
+    cin >> outputSampleRate;
+  }while(outputSampleRate<=0);
+  if(iWAVSampleRate != outputSampleRate) LOG_F(WARNING, "Different sample rate between wav file and default device");
+  if(!TestLine.defaultSetup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, outputSampleRate, iNumChannels)){
     LOG_F(ERROR,"ERROR : El setup no ha ido bien");
     exit(1);
   }
@@ -109,7 +113,7 @@ int main(int argc, char* argv[])
   if(!TestLine.autoTest()) LOG_F(ERROR,"ERROR : Autotest falló.");
   LOG_F(INFO,"Saliendo del programa.");
     
-  if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, inputSampleRate, iNumChannels, *mainCallback)){
+  if(!TestLine.setup(Pa_GetDefaultOutputDevice(), iFramesPerBuffer, outputSampleRate, iNumChannels, *mainCallback)){
     LOG_F(ERROR,"ERROR : El setup no ha ido bien");
     exit(1);
   }
@@ -131,24 +135,12 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
   (void) __timeInfo; /* Prevent unused variable warnings. */
   (void) __statusFlags;
   (void) __inputBuffer;
-  int iActualChannel;
   //THERE IS A __framesPerBuffer PER CHANNEL!!!
   //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
   for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-    for(iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
-      if(iActualFrame < iTotalNumSamples){
-        *fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
-      }else{
-        if(bLoopMode){
-          iActualFrame = 0;
-          LOG_F(INFO, "Restarting WAV file");
-          *fpOut++= audioFile.samples[iActualChannel][iActualFrame];  /* left */
-        }else{
-          *fpOut++=0;
-        }  
-      } 
+    for(int iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
+      *fpOut++= audioFile.getFrame();  /* left */
     }//for ends iActualChannel
-    if(iActualFrame < iTotalNumSamples) iActualFrame++;
   }//for ends frames per buffer
   return paContinue;
 }//paCallbackMethod ends

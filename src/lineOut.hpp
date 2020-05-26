@@ -61,13 +61,13 @@ namespace line_out_namespace{
 
       bool close();
       bool start();
-       bool pause();
+      bool pause();
       // play a #A5 880Hz for one second, pause one second, 
       // then play a #A4 440Hz for another second.
       bool autoTest();  //Close the stream at finish;
       
-      int getSampleRate();
-      int getBufferSize();
+      int  getSampleRate();
+      int  getBufferSize();
       void getBufferDataAdress(vector <float> * * __data);
       void setBufferDataAdress(vector <float> * __data);
     //public ends

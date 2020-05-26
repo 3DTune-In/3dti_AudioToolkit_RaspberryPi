@@ -52,15 +52,16 @@ namespace sound_file_namespace{
         bool setActualTime(float __fTime);//respecto al sampleRate del archivo.
         bool setChannelWeight( vector<float> __vfChannelWeight);
 
-        int getFileLength();
+        int   getFileLength();
         float getTimeFileLenght();
-        int getActuaalSampleNumber();
+        int   getActualSampleNumber();
+        int   getNumChannels();
         //VIRTUALES Y HEREDADOS
         float getFrame();
-        int getSampleRate();
-        bool play();
-        bool pause();
-        bool stop();
+        int   getSampleRate();
+        bool  play();
+        bool  pause();
+        bool  stop();
 
       //Public ends
       //////////////////////////////////////////////////////////////////
