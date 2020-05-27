@@ -1,6 +1,5 @@
 /**
 * \start date  december 2019
-* \class line_out
 *
 * \brief Declaration of class line_out
 * \date  April 2020
@@ -36,12 +35,10 @@
 #include "./src/thirdPartyLibs/loguru/loguru.cpp"
 #include "./src/portaudio.h"
 #include "./src/lineOut.hpp"
-#include "./src/soundFile.hpp"
 #include "./src/soundSource.hpp"
+#include "./src/soundFile.hpp"
 
 using namespace line_out_namespace;
-using namespace sound_file_namespace;
-using namespace sound_source_namespace;
 
 #define NUM_SECONDS    (1)     //For each tone.
 const char LOG_FOLDER[20] = "./general.log";
@@ -84,13 +81,13 @@ int main(int argc, char* argv[])
   }
   LOG_F(2, "Configurando la salida de audio.");
   do{
-    LOG_F(INFO, "Por favor, introduzca los frames per buffer deseados :\n");
+    LOG_F(INFO, "Por favor, introduzca los frames per buffer deseados : ");
     cin >> iFramesPerBuffer;
   }while(iFramesPerBuffer<=0);
   cin.ignore();
   char inputChar;
   do{
-    LOG_F(INFO, "Quiere habilitar el modo loop?(y/n) :\n");
+    LOG_F(INFO, "Quiere habilitar el modo loop?(y/n) : ");
     cin >> inputChar;
   }while(inputChar != 'y' && inputChar !='n');
   cin.ignore();
@@ -101,7 +98,7 @@ int main(int argc, char* argv[])
   const PaDeviceInfo *deviceInfo;
   deviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
   do{
-    LOG_F(INFO, "Introduzca el SampleRate del dispositivo %s", deviceInfo->name);
+    LOG_F(INFO,"Introduzca el SampleRate del dispositivo %s", deviceInfo->name);
     LOG_F(INFO, "el valor por defecto es: %d",deviceInfo->defaultSampleRate);
     cin >> outputSampleRate;
   }while(outputSampleRate<=0);
@@ -150,8 +147,8 @@ static int mainCallback( const void *inputBuffer, void *outputBuffer,
         unsigned long framesPerBuffer, const PaStreamCallbackTimeInfo* timeInfo,
         PaStreamCallbackFlags statusFlags,void *userData )
 {
-  /* Here we cast userData to CLineOut* type so we can call the instance method paCallbackMethod, we can do that since
-  we called Pa_OpenStream with 'this' for userData */
+  /* Here we cast userData to CLineOut* type so we can call the instance method 
+  paCallbackMethod, we can do that since we called Pa_OpenStream with 'this' for userData */
   return mainCallbackMethod(inputBuffer, outputBuffer,
           framesPerBuffer,timeInfo,statusFlags);
 }//paCallback ends

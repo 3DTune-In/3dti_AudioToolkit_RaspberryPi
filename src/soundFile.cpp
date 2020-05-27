@@ -27,143 +27,134 @@
 
 /*! \file */
 
-
-#include <vector> // for array, at()
-#include <iostream>
-#include <string>
-#include <mutex>
-#include "./thirdPartyLibs/AudioFile/AudioFile.h"
 #include "./soundFile.hpp"
-#include "./soundSource.hpp"
 
 using namespace std;
 
-namespace sound_file_namespace{
-  CSoundFile::CSoundFile(){}
-  
-  bool CSoundFile::setup(string __sFilePath, vector<float>  __vfChannelWeight, bool __bLoopMode){
-    bPlay= true;
-    iActualSample=0;
-    audioFile.load (__sFilePath);
-    sFilePath = __sFilePath;
-    iSampleRate = audioFile.getSampleRate();
-    iNumChannelsInFile = audioFile.getNumChannels();
-    iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
-    vfChannelWeight = __vfChannelWeight;
-    bLoopMode = __bLoopMode;
-  }//setup(sFilePath, __vfChannelWeight, __bLoopMode) ends
+CSoundFile::CSoundFile(){}
 
-  bool CSoundFile::setup(string __sFilePath, vector<float>  __vfChannelWeight){
-    bPlay= true;
-    iActualSample=0;
-    audioFile.load (__sFilePath);
-    sFilePath = __sFilePath;
-    iSampleRate = audioFile.getSampleRate();
-    iNumChannelsInFile = audioFile.getNumChannels();
-    iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
-    vfChannelWeight = __vfChannelWeight;
-    bLoopMode = true;
-  }//setup(sFilePath, __vfChannelWeight) ends
+bool CSoundFile::setup(string __sFilePath, vector<float>  __vfChannelWeight, bool __bLoopMode){
+  bPlay= true;
+  iActualSample=0;
+  audioFile.load (__sFilePath);
+  sFilePath = __sFilePath;
+  iSampleRate = audioFile.getSampleRate();
+  iNumChannelsInFile = audioFile.getNumChannels();
+  iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
+  vfChannelWeight = __vfChannelWeight;
+  bLoopMode = __bLoopMode;
+}//setup(sFilePath, __vfChannelWeight, __bLoopMode) ends
 
-  bool CSoundFile::setup(string __sFilePath){
-    bPlay= true;
-    iActualSample=0;
-    audioFile.load (__sFilePath);
-    sFilePath = __sFilePath;
-    iSampleRate = audioFile.getSampleRate();
-    iNumChannelsInFile = audioFile.getNumChannels();
-    iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
-    for(int iActualChannel=0; iActualChannel<iNumChannelsInFile; iActualChannel++){
-      vfChannelWeight.push_back(0.0);
-    }
-    vfChannelWeight[0]=1.0;
-    bLoopMode = true;
-    return true;
-  }//setup(sFilePath) ends
+bool CSoundFile::setup(string __sFilePath, vector<float>  __vfChannelWeight){
+  bPlay= true;
+  iActualSample=0;
+  audioFile.load (__sFilePath);
+  sFilePath = __sFilePath;
+  iSampleRate = audioFile.getSampleRate();
+  iNumChannelsInFile = audioFile.getNumChannels();
+  iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
+  vfChannelWeight = __vfChannelWeight;
+  bLoopMode = true;
+}//setup(sFilePath, __vfChannelWeight) ends
 
-  bool CSoundFile::setLoop(bool __bLoopMode){
-    bLoopMode=__bLoopMode;
-    return true;
+bool CSoundFile::setup(string __sFilePath){
+  bPlay= true;
+  iActualSample=0;
+  audioFile.load (__sFilePath);
+  sFilePath = __sFilePath;
+  iSampleRate = audioFile.getSampleRate();
+  iNumChannelsInFile = audioFile.getNumChannels();
+  iNumSamplesPerchannelInFile = audioFile.getNumSamplesPerChannel();
+  for(int iActualChannel=0; iActualChannel<iNumChannelsInFile; iActualChannel++){
+    vfChannelWeight.push_back(0.0);
   }
+  vfChannelWeight[0]=1.0;
+  bLoopMode = true;
+  return true;
+}//setup(sFilePath) ends
 
-  bool CSoundFile::setActualSample(int __iSampleNumber){
+bool CSoundFile::setLoop(bool __bLoopMode){
+  bLoopMode=__bLoopMode;
+  return true;
+}
+
+bool CSoundFile::setActualSample(int __iSampleNumber){
+  mtx_getFrame.lock();//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
+  iActualSample=__iSampleNumber;
+  mtx_getFrame.unlock();
+  return true;
+}
+
+bool CSoundFile::setActualTime(float __fTime){
+  if(__fTime*iSampleRate<iNumSamplesPerchannelInFile){
     mtx_getFrame.lock();//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
-    iActualSample=__iSampleNumber;
+    iActualSample=__fTime*iSampleRate;
     mtx_getFrame.unlock();
     return true;
+  }else{
+    return false;
   }
+}//setActualTime ends
 
-  bool CSoundFile::setActualTime(float __fTime){
-    if(__fTime*iSampleRate<iNumSamplesPerchannelInFile){
-      mtx_getFrame.lock();//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
-      iActualSample=__fTime*iSampleRate;
+bool CSoundFile::setChannelWeight(vector<float> __vfChannelWeight){
+  if(__vfChannelWeight.size()<iNumChannelsInFile){
+    mtx_getFrame.lock();//pensando en la callback, que es de otra hebra y en el interfaz de control, que es asíncono.
+    vfChannelWeight=__vfChannelWeight;
+    mtx_getFrame.unlock();
+    return true;
+  }else{
+    return false;
+  }
+}//setChannelWeight ends
+
+int CSoundFile::getFileLength(){
+  return iNumSamplesPerchannelInFile;
+}
+
+float CSoundFile::getTimeFileLenght(){
+  return iNumSamplesPerchannelInFile*iSampleRate;
+}
+
+int CSoundFile::getActualSampleNumber(){
+  return iActualSample;
+}
+
+float CSoundFile::getFrame(){
+  if(bPlay){
+    if(iActualSample < iNumSamplesPerchannelInFile){
+      float result=0;
+      mtx_getFrame.lock();
+      for(int iActualChannel=0; iActualChannel<iNumChannelsInFile; iActualChannel++){
+        result += audioFile.samples[iActualChannel][iActualSample]*vfChannelWeight[iActualChannel];
+      }//for ends
+      iActualSample++;
       mtx_getFrame.unlock();
-      return true;
-    }else{
-      return false;
-    }
-  }//setActualTime ends
-
-  bool CSoundFile::setChannelWeight(vector<float> __vfChannelWeight){
-    if(__vfChannelWeight.size()<iNumChannelsInFile){
-      mtx_getFrame.lock();//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
-      vfChannelWeight=__vfChannelWeight;
-      mtx_getFrame.unlock();
-      return true;
-    }else{
-      return false;
-    }
-  }//setChannelWeight ends
-
-  int CSoundFile::getFileLength(){
-    return iNumSamplesPerchannelInFile;
-  }
-
-  float CSoundFile::getTimeFileLenght(){
-    return iNumSamplesPerchannelInFile*iSampleRate;
-  }
-
-  int CSoundFile::getActualSampleNumber(){
-    return iActualSample;
-  }
-
-  float CSoundFile::getFrame(){
-    if(bPlay){
-      if(iActualSample < iNumSamplesPerchannelInFile){
+      return result;
+    }else{//if iActualSample > iNumSamplesPerchannelInFile
+      if(bLoopMode){
+        iActualSample=0;
         float result=0;
         mtx_getFrame.lock();
         for(int iActualChannel=0; iActualChannel<iNumChannelsInFile; iActualChannel++){
           result += audioFile.samples[iActualChannel][iActualSample]*vfChannelWeight[iActualChannel];
-        }
+        }//for ends
         iActualSample++;
         mtx_getFrame.unlock();
         return result;
-      }else{//if iActualSample < iNumSamplesPerchannelInFile
-        if(bLoopMode){
-          iActualSample=0;
-          float result=0;
-          mtx_getFrame.lock();
-          for(int iActualChannel=0; iActualChannel<iNumChannelsInFile; iActualChannel++){
-            result += audioFile.samples[iActualChannel][iActualSample]*vfChannelWeight[iActualChannel];
-          }//for ends
-          iActualSample++;
-          mtx_getFrame.unlock();
-          return result;
-        }else{//if bloopMode
-          return 0.0;
-        }
-      }//if/else iActualSample< iNumSamplesPerchannelInFile ends
-    }else{//else bPlay
-      return 0.0;
-    }
-  }//getFrame ends
-
-  bool CSoundFile::stop(){
-    bPlay = false;
-    iActualSample=0;
+      }else{//if bloopMode false
+        return 0.0;
+      }
+    }//else actualSample < iNumSamplesPerChannelInFile ends
+  }else{//else bPlay
+    return 0.0;
   }
+}//getFrame ends
 
-  int CSoundFile::getNumChannels(){
-    return iNumChannelsInFile;
-  }
-}//namespace ends
+bool CSoundFile::stop(){
+  bPlay = false;
+  iActualSample=0;
+}
+
+int CSoundFile::getNumChannels(){
+  return iNumChannelsInFile;
+}

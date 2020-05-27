@@ -34,49 +34,48 @@
 #include <vector> // for array, at()
 #include <iostream>
 #include <mutex>
-#include "./soundSource.cpp"
 #include "./thirdPartyLibs/AudioFile/AudioFile.h"
+#include "./soundSource.hpp"
 
-using namespace sound_source_namespace;
+using namespace std;
 
-namespace sound_file_namespace{
-  class CSoundFile: protected CSoundSource
-    {
-      public:
-        //Setup the stream file, by default, loop mode is enabled and just select channel 0
-        CSoundFile();
-        bool setup(string __sFilePath,vector<float> __vfChannelWeight, bool __bLoopMode);
-        bool setup(string __sFilePath, vector<float> __vfChannelWeight);
-        bool setup(string __sFilePath);
 
-        bool setLoop(bool __bLoopMode);
-        bool setActualSample(int __iSampleNumber);
-        bool setActualTime(float __fTime);//respecto al sampleRate del archivo.
-        bool setChannelWeight( vector<float> __vfChannelWeight);
+class CSoundFile: public CSoundSource
+{
+  public:
+    //Setup the stream file, by default, loop mode is enabled and just select channel 0
+    CSoundFile();
+    bool setup(string __sFilePath,vector<float> __vfChannelWeight, bool __bLoopMode);
+    bool setup(string __sFilePath, vector<float> __vfChannelWeight);
+    bool setup(string __sFilePath);
 
-        int   getFileLength();
-        float getTimeFileLenght();
-        int   getActualSampleNumber();
-        int   getNumChannels();
-        bool  stop();
+    bool setLoop(bool __bLoopMode);
+    bool setActualSample(int __iSampleNumber);
+    bool setActualTime(float __fTime);//respecto al sampleRate del archivo.
+    bool setChannelWeight( vector<float> __vfChannelWeight);
 
-        //VIRTUALES Y HEREDADOS
-        float getFrame();
-        //int   getSampleRate();
-        //bool  play();
-        //bool  pause();
+    int   getFileLength();
+    float getTimeFileLenght();
+    int   getActualSampleNumber();
+    int   getNumChannels();
+    bool  stop();
 
-      //Public ends
-      //////////////////////////////////////////////////////////////////
-      private:
-        bool bLoopMode;
-        int  iNumChannelsInFile;
-        int  iNumSamplesPerchannelInFile;
-        int  iActualSample;
-        string sFilePath;
-        AudioFile<double> audioFile;
-        vector<float> vfChannelWeight;
-        mutex mtx_getFrame;//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
-    };//class ends
-}//namespace ends
+    //VIRTUALES Y HEREDADOS
+    float getFrame();
+    //int   getSampleRate();
+    //bool  play();
+    //bool  pause();
+
+  //Public ends
+  //////////////////////////////////////////////////////////////////
+  private:
+    bool bLoopMode;
+    int  iNumChannelsInFile;
+    int  iNumSamplesPerchannelInFile;
+    int  iActualSample;
+    string sFilePath;
+    AudioFile<double> audioFile;
+    vector<float> vfChannelWeight;
+    mutex mtx_getFrame;//pensando en la callback, que es de otra hebra.. y en el interfaz de contro, que es asíncono.
+};//class ends
 #endif

@@ -32,20 +32,20 @@
 
 using namespace std;
 
-namespace sound_source_namespace{
+bool  CSoundSource::play(){
+  bPlay = true;
+  return true;
+}
 
-  int CSoundSource::getSampleRate(){
-    return iSampleRate;
-  }
+bool  CSoundSource::pause(){
+  bPlay = false;
+  return true;
+}
 
-  bool  CSoundSource::play(){
-    bPlay = true;
-    return true;
-  }
+int CSoundSource::getSampleRate(){
+  return iSampleRate;
+}
 
-  bool  CSoundSource::pause(){
-    bPlay = false;
-    return true;
-  }
+float CSoundSource::getFrame(){}
 
-}//namespace ends
+CSoundSource::~CSoundSource(){}

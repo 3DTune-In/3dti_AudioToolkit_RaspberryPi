@@ -32,21 +32,22 @@
 
 #include <iostream>
 
-namespace sound_source_namespace{
-  class CSoundSource
-    {
-      public:
-        //VIRTUALES Y HEREDADOS
-        int   getSampleRate();
-        bool  play();
-        bool  pause();
-        virtual float getFrame();
+using namespace std;
 
-      //Public ends
-      //////////////////////////////////////////////////////////////////
-      protected:
-        int  iSampleRate;
-        bool bPlay;
-    };//class ends
-}//namespace ends
+class CSoundSource
+{
+  public:
+    //VIRTUALES Y HEREDADOS
+    int   getSampleRate();
+    bool  play();
+    bool  pause();
+    virtual float getFrame();
+    virtual ~CSoundSource();
+
+  //Public ends
+  //////////////////////////////////////////////////////////////////
+  protected:
+    int  iSampleRate;
+    bool bPlay;
+};//class ends
 #endif
