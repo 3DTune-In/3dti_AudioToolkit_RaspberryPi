@@ -42,14 +42,21 @@ using namespace line_out_namespace;
 
 #define NUM_SECONDS    (1)     //For each tone.
 const char LOG_FOLDER[20] = "./general.log";
-string WAV_PATH = "./src/thirdPartyLibs/AudioFile/tests/AudioFileTests/test-audio/wav_stereo_24bit_44100.wav";
+
+string WAV_PATH_1 = "./resources/3DTI_Sample_44.1kHz_MusicJazzPiano.wav";
+string WAV_PATH_2 = "./resources/3DTI_Sample_44.1kHz_MusicJazzBass.wav";
+string WAV_PATH_3 = "./resources/3DTI_Sample_44.1kHz_MusicJazzDrum.wav";
+string WAV_PATH_4 = "./resources/3DTI_Sample_44.1kHz_MusicJazzGuitar.wav";
+
+const int TAM = 4;
+string WAV_PATHS[TAM] = {WAV_PATH_1, WAV_PATH_2, WAV_PATH_3, WAV_PATH_4};
 int iNumChannels;
 int iWAVSampleRate;
 int iTotalNumSamples;
 int iActualFrame=0;
 int iFramesPerBuffer = 512;//default value
 bool bLoopMode = false;//default value
-CSoundFile audioFile;
+CSoundFile audioFile[TAM];
 
 
 /*******************************************************************/
@@ -66,11 +73,14 @@ int main(int argc, char* argv[])
   loguru::init(argc,argv);
   // Put every log message in "everything.log":
   loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
-  
-  audioFile.setup (WAV_PATH);
-  iWAVSampleRate = audioFile.getSampleRate();
-  iNumChannels = audioFile.getNumChannels();
-  iTotalNumSamples = audioFile.getFileLength();
+  for(int actualElement = 0; actualElement < TAM; actualElement++){
+    
+    audioFile[actualElement].setup(WAV_PATHS[actualElement]);
+    iWAVSampleRate = audioFile[actualElement].getSampleRate();
+    iNumChannels = audioFile[actualElement].getNumChannels();
+    iTotalNumSamples = audioFile[actualElement].getFileLength();
+  }
+
 
   if(iNumChannels > 2) iNumChannels = 2;
   LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);    
@@ -93,7 +103,9 @@ int main(int argc, char* argv[])
   cin.ignore();
   if(inputChar=='y') bLoopMode=true;
   else bLoopMode=false;
-  audioFile.setLoop(bLoopMode);
+  for(int actualElement=0; actualElement<TAM; actualElement++){
+    audioFile[actualElement].setLoop(bLoopMode);
+  }
   int outputSampleRate;
   const PaDeviceInfo *deviceInfo;
   deviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
@@ -133,11 +145,16 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
   (void) __timeInfo; /* Prevent unused variable warnings. */
   (void) __statusFlags;
   (void) __inputBuffer;
+  float fResult=0;
   //THERE IS A __framesPerBuffer PER CHANNEL!!!
   //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
   for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
     for(int iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
-      *fpOut++= audioFile.getFrame();  /* left */
+      for(int actualFile=0; actualFile<TAM; actualFile++){
+        fResult+=audioFile[actualFile].getFrame();
+      }
+      *fpOut++= fResult;
+      fResult=0;
     }//for ends iActualChannel
   }//for ends frames per buffer
   return paContinue;
