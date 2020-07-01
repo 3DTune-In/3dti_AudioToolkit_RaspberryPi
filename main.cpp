@@ -73,15 +73,7 @@ int main(int argc, char* argv[])
   loguru::init(argc,argv);
   // Put every log message in "everything.log":
   loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
-   vector<float> channelWeight{0.0,0.0};
   for(int actualElement = 0; actualElement < TAM; actualElement++){
-    if(actualElement <TAM/2){
-      channelWeight[0] = 1.0;
-      channelWeight[1] = 0.0;
-    } else{
-      channelWeight[0] = 0.0;
-      channelWeight[1] = 1.0;
-    }
     audioFile[actualElement].setup(WAV_PATHS[actualElement]);
     iWAVSampleRate = audioFile[actualElement].getSampleRate();
     iNumChannels = audioFile[actualElement].getNumChannels();
@@ -90,7 +82,8 @@ int main(int argc, char* argv[])
 
 
   if(iNumChannels > 2) iNumChannels = 2;
-  LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);    
+  LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);   
+  iNumChannels = 2; 
   CLineOut TestLine;
   if(TestLine.result() != paNoError) {
     LOG_F(ERROR,"ERROR : No se ha podido iniciar portaudio");
@@ -156,19 +149,18 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
   //THERE IS A __framesPerBuffer PER CHANNEL!!!
   //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
   for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
-    
-    for(int actualFile=0; actualFile<TAM/2; actualFile++){
-      fResult+=audioFile[actualFile].getFrame();
-    }
-    
-    /*
     for(int iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
       for(int actualFile=0; actualFile<TAM; actualFile++){
-        fResult+=audioFile[actualFile].getFrame();
+        if(iActualChannel < iNumChannels/2 && actualFile < TAM/2){
+          fResult+=audioFile[actualFile].getFrame();
+        }
+        if(iActualChannel >= iNumChannels/2 && actualFile >= TAM/2){
+          fResult+=audioFile[actualFile].getFrame();
+        }
       }
       *fpOut++= fResult;
       fResult=0;
-    }//for ends iActualChannel*/
+    }//for ends iActualChannel
   }//for ends frames per buffer
   return paContinue;
 }//paCallbackMethod ends
