@@ -8,3 +8,5 @@ YOUR_BINARY*
 general.log
 
 PortableAudiospatialization
+
+src/thirdPartyLibs/loguru

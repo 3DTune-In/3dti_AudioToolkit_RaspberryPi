@@ -73,8 +73,15 @@ int main(int argc, char* argv[])
   loguru::init(argc,argv);
   // Put every log message in "everything.log":
   loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
+   vector<float> channelWeight{0.0,0.0};
   for(int actualElement = 0; actualElement < TAM; actualElement++){
-    
+    if(actualElement <TAM/2){
+      channelWeight[0] = 1.0;
+      channelWeight[1] = 0.0;
+    } else{
+      channelWeight[0] = 0.0;
+      channelWeight[1] = 1.0;
+    }
     audioFile[actualElement].setup(WAV_PATHS[actualElement]);
     iWAVSampleRate = audioFile[actualElement].getSampleRate();
     iNumChannels = audioFile[actualElement].getNumChannels();
@@ -111,7 +118,7 @@ int main(int argc, char* argv[])
   deviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
   do{
     LOG_F(INFO,"Introduzca el SampleRate del dispositivo %s", deviceInfo->name);
-    LOG_F(INFO, "el valor por defecto es: %d",deviceInfo->defaultSampleRate);
+    if(deviceInfo->defaultSampleRate != 0) LOG_F(INFO, "el valor por defecto es: %d",deviceInfo->defaultSampleRate);
     cin >> outputSampleRate;
   }while(outputSampleRate<=0);
   if(iWAVSampleRate != outputSampleRate) LOG_F(WARNING, "Different sample rate between wav file and default device");
@@ -149,13 +156,19 @@ int mainCallbackMethod(const void *__inputBuffer, void *__outputBuffer,
   //THERE IS A __framesPerBuffer PER CHANNEL!!!
   //fpOut READS __framesPerBuffer*iNumberOfChannels floats per callback!!!
   for(unsigned int uiCount=0; uiCount<__framesPerBuffer;uiCount++){
+    
+    for(int actualFile=0; actualFile<TAM/2; actualFile++){
+      fResult+=audioFile[actualFile].getFrame();
+    }
+    
+    /*
     for(int iActualChannel = 0; iActualChannel<iNumChannels; iActualChannel++){
       for(int actualFile=0; actualFile<TAM; actualFile++){
         fResult+=audioFile[actualFile].getFrame();
       }
       *fpOut++= fResult;
       fResult=0;
-    }//for ends iActualChannel
+    }//for ends iActualChannel*/
   }//for ends frames per buffer
   return paContinue;
 }//paCallbackMethod ends
