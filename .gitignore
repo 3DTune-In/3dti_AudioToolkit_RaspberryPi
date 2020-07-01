@@ -1,3 +1,12 @@
 YOUR_BINARY*
-./src/libportaudio.a
-./src/libportaudio.h
+./PortableAudiospatialization*
+./src/lineOut/libportaudio.a
+./src/lineOut/libportaudio.h
+./*.log
+*.o
+
+general.log
+
+PortableAudiospatialization
+
+src/thirdPartyLibs/loguru

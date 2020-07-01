@@ -1,0 +1,6 @@
+[submodule "src/thirdPartyLibs/AudioFile"]
+	path = src/thirdPartyLibs/AudioFile
+	url = https://github.com/gonzupi/AudioFile.git
+[submodule "src/thirdPartyLibs/loguru"]
+	path = src/thirdPartyLibs/loguru
+	url = https://github.com/emilk/loguru.git
