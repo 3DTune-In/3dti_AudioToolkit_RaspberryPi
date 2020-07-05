@@ -4,3 +4,7 @@
 [submodule "src/thirdPartyLibs/loguru"]
 	path = src/thirdPartyLibs/loguru
 	url = https://github.com/emilk/loguru.git
+[submodule "src/thirdPartyLibs/portaudio"]
+	path = src/thirdPartyLibs/portaudio
+	url = https://git.assembla.com/portaudio.git
+

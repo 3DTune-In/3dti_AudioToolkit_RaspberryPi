@@ -2,11 +2,10 @@ YOUR_BINARY*
 ./PortableAudiospatialization*
 ./src/lineOut/libportaudio.a
 ./src/lineOut/libportaudio.h
-./*.log
+./src/pio
+./src/pa_*
+./src/portaudio.h
+*.log
 *.o
 
-general.log
-
 PortableAudiospatialization
-
-src/thirdPartyLibs/loguru
