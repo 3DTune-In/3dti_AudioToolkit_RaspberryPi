@@ -71,6 +71,7 @@ int main(int argc, char* argv[]);
 int main(int argc, char* argv[])
 {
   loguru::init(argc,argv);
+  LOG_F(INFO,"Abriendo archivo wav");
   // Put every log message in "everything.log":
   loguru::add_file(LOG_FOLDER, loguru::Append, loguru::Verbosity_MAX);
   for(int actualElement = 0; actualElement < TAM; actualElement++){
@@ -79,10 +80,7 @@ int main(int argc, char* argv[])
     iNumChannels = audioFile[actualElement].getNumChannels();
     iTotalNumSamples = audioFile[actualElement].getFileLength();
   }
-
-
-  if(iNumChannels > 2) iNumChannels = 2;
-  LOG_F(INFO,"Abriendo archivo wav con %d canales y %d de sampleRate.", iNumChannels, iWAVSampleRate);   
+  LOG_F(INFO, "Archivo wav de %d segundos abierto con %d canales y un sampleRate de %d .", int((iTotalNumSamples / iNumChannels) / iWAVSampleRate), iNumChannels, iWAVSampleRate);
   iNumChannels = 2; 
   CLineOut TestLine;
   if(TestLine.result() != paNoError) {
@@ -108,7 +106,10 @@ int main(int argc, char* argv[])
   }
   int outputSampleRate;
   const PaDeviceInfo *deviceInfo;
+  LOG_f(INFO, "Hay %d dispositivos de audio disponibles", Pa_GetDeviceCount());
+  LOG_f(INFO, "El dispositivo por defecto es %d",Pa_GetDefaultOutputDevice());
   deviceInfo = Pa_GetDeviceInfo(Pa_GetDefaultOutputDevice());
+  LOG_f(INFO, "Información del dispositivo por defecto guardada");
   do{
     LOG_F(INFO,"Introduzca el SampleRate del dispositivo %s", deviceInfo->name);
     if(deviceInfo->defaultSampleRate != 0) LOG_F(INFO, "el valor por defecto es: %d",deviceInfo->defaultSampleRate);
